@@ -239,10 +239,10 @@ private:
     // int nn_index;
     std::string method;
     int algorithm;
-    bool loopclosureFlag;
+    bool loopclosureFlag, GT_flag;
     bool fusion;
-    std::string filename1,filename2;
-    int PCD_counter;
+    std::string filename1,filename2,filename3;
+    int PCD_counter,GT_idx;
 
     bool shouldShutdown = false;
     std::condition_variable cv;
@@ -309,10 +309,15 @@ public:
         //REDE TIAGO
     
         PCD_counter = 0;
+        GT_idx = 0;
 
         ros::param::param<std::string>("/method", method, "SC");
         ros::param::param<std::string>("/file_prediction", filename1, "/home/joaojorge/Documents/relocalization/VLAD/prediction.txt");
         ros::param::param<std::string>("/file_score", filename2, "/home/joaojorge/Documents/relocalization/VLAD/similarity.txt");
+
+        // GROUND TRUTH loop closure indexes for each frame
+        ros::param::param<std::string>("/ground_truth", filename3, "/home/joaojorge/Documents/relocalization/VLAD/targets.txt");
+        ros::param::param<bool>("/GT_flag", GT_flag, false);
 
         // ros::param::param<int>("/algorithm", algorithm, 1);
         ros::param::param<bool>("/loopclosureFlag", loopclosureFlag, true);
@@ -341,6 +346,8 @@ public:
         // }
         if(method == "ficheiro" || method == "fusion")
             loops_rede.read_file(filename1,filename2);
+            if (GT_flag == true)
+                loops_rede.read_GT(filename3);
     }
  
     void allocateMemory(){
@@ -920,6 +927,27 @@ public:
         pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
     }
 
+    void save_indexes(){
+        if(GT_flag == true){
+            std::ofstream outputFile("/home/joaojorge/INDEXES.txt");
+            if (outputFile.is_open()){
+                // Write ground truth and scan context output indexes to the file
+                for (int i = 0; i < loops_rede.GT_INDEX.size() && i < loops_rede.SC_INDEX.size(); ++i) {
+                    outputFile << loops_rede.GT_INDEX[i] << " " << loops_rede.SC_INDEX[i] << '\n';
+                }
+
+                // Close the file after writing
+                outputFile.close();
+                std::cout << "Data written to the file successfully." << std::endl;
+            } 
+            else {
+                std::cout << "Error opening the file." << std::endl;
+            }
+            
+        }
+        return;
+    }
+
     void publishGlobalMap(){
 
         if (pubLaserCloudSurround.getNumSubscribers() == 0)
@@ -1076,6 +1104,12 @@ public:
             auto detectResult = scManager.detectLoopClosureID(); // first: nn index, second: yaw diff 
             SCclosestHistoryFrameID = detectResult.first;
             yawDiffRad = detectResult.second; // not use for v1 (because pcl icp withi initial somthing wrong...)
+
+            // loops_rede.store_indexes(SCclosestHistoryFrameID, loops_rede.frame_id);
+            loops_rede.SC_INDEX.push_back(SCclosestHistoryFrameID);
+            GT_idx = loops_rede.indexes(loops_rede.LOOPS_INDEX_GT,latestFrameIDLoopCloure);
+            loops_rede.GT_INDEX.push_back(GT_idx);
+
         }
         // ******************  REDE TIAGO   ******************
         else if(method == "ficheiro"){
@@ -1110,6 +1144,7 @@ public:
 
             if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX.size()){
                 // savePointCloud();
+                save_indexes();
                 // std::cout << "SAVING PCD." << std::endl;
                 RedeclosestHistoryFrameID = -1;
                 min_score= 0;
@@ -2250,7 +2285,8 @@ public:
                 // std::cout << "PUSH POINTCLOUD FUSION" << endl;
                 scManager.makeAndSaveScancontextAndKeys(*thisRawCloudKeyFrame);    
                 loops_rede.LOOP_BUFFER_FILTERED.push_back(PCD_counter);
-                loops_rede.LOOP_BUFFER_GLOBAL.push_back(loops_rede.frame_id);   
+                loops_rede.LOOP_BUFFER_GLOBAL.push_back(loops_rede.frame_id); 
+                
                 // std::cout << "PCD stored in local buffer frameID: " << PCD_counter << endl;
                 // std::cout << "PCD stored in global buffer frameID: " << loops_rede.frame_id-1<< endl;
                 PCD_counter++;  

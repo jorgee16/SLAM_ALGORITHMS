@@ -90,6 +90,46 @@ void LOOPS_FROM_FILE::read_file(std::string filename1,std::string filename2){
 
 }
 
+void LOOPS_FROM_FILE::read_GT(std::string filename){
+
+    std::ifstream file1;
+
+    file1.open(filename,std::ios::in);
+
+    if (!file1.is_open()){
+        std::cout << ("Error opening file.\n");
+        
+    }
+    else{
+        std::cout << "LENDO O FICHEIRO DE GT" << std::endl;
+    }
+    
+    std::string line;
+    while(getline(file1,line))
+    {       
+            if (line.empty())
+            {
+                std::vector <int> coluna;
+                coluna.push_back(-1);
+                LOOPS_INDEX_GT.push_back(coluna);
+            }
+            
+            else
+            {
+                std::vector<int> coluna;
+                std::istringstream iss(line);
+                int val;
+                while( iss >> val){
+                    coluna.push_back(val);
+                }
+
+                LOOPS_INDEX_GT.push_back(coluna);     
+            }
+    }
+    file1.close();
+
+}
+
 int LOOPS_FROM_FILE::indexes (std::vector<std::vector<int>> index, int frame_id){
     // std::vector<int> candidate_indexes;
     
@@ -128,7 +168,7 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
     /* 
      * step 1: candidates from ringkey tree_
      */
-
+    
     std::cout << std::endl << "frame_id:" << frame_id << std::endl;
     // std::cout << "frame_id: " << frame_id << std::endl;
     if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX[frame_id]) == false)
@@ -172,6 +212,16 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
     // std::pair<int, float> result {nn_idx, min_score};
     // return result;
     return std::make_pair(-1,0.0);
+}
+
+void LOOPS_FROM_FILE::store_indexes(int SC_idx, int frame){
+
+    int GT_idx;
+    SC_INDEX.push_back(SC_idx);
+    GT_idx = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame);
+    GT_INDEX.push_back(GT_idx);
+
+    return;
 }
 
 int LOOPS_FROM_FILE::checkBUFFER(int nn_idx, float min_score){

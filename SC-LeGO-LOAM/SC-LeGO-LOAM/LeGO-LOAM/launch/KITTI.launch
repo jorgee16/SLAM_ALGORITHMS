@@ -29,12 +29,15 @@
                     ficheiro
                     fusion              
                                          --> 
-    <param name="loopclosureFlag" type="bool" value="false"/>
+    <param name="loopclosureFlag" type="bool" value="true"/>
+    <param name="GT_flag" type="bool" value="true"/>
+    
     <!-- <param name="fusion" type="bool" value="false"/> -->
     <!-- <param name="algorithm" type ="int" value ="1" /> -->
 
     <param name="file_prediction" type ="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/prediction.txt" />
     <param name="file_score" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/similarity.txt" />
+    <param name="ground_truth" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/targets.txt" /> 
 
     <!--           ALGORITHMS               -->
     <!--
@@ -64,7 +67,7 @@
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 -1.570795 -1.570795 0        /camera /base_link   10" />
 
     <!--- Robot State TF -->
-    <include file="$(find lego_loam)/launch/include/module_robot_state_publisher.launch" />
+    <include file="$(find lego_loam)/launch/include/module_KITTI_state_publisher.launch" />
 
     <!--- LeGO-LOAM -->    
     <node pkg="lego_loam" type="imageProjection"    name="imageProjection"    output="screen"/>
