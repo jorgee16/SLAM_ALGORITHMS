@@ -1,0 +1,52 @@
+1) Terminal 1: 
+	- iniciar ROS
+	
+	$ source ~/catkin_ws/devel/setup.bash
+	$ roscore
+
+2) Terminal 2:
+	- iniciar câmera RGB
+	
+	$ ximea 
+	
+	obs: senha -> 123
+	
+	- iniciar velodyne
+	
+	clicar em conectar na internet cabeada (ubuntu menu superior direito)
+	
+	- iniciar todos os sensores:
+	
+	$ roslaunch dataset dataset.launch
+	
+3) Terminal 3:
+	
+	- verificar frequência dos sensores
+	
+	$ rostopic hz /ximea_cam2/image_raw
+	
+	obs: deve estar próxima de 30Hz
+	
+	$ rostopic hz /flir_boson/image_raw
+	
+	obs: deve estar próxima de 40Hz
+	
+	$ rostopic hz /velodyne_points
+	
+	obs: deve estar próxima de 10Hz
+	
+	- obs:
+	
+	se alguns dos sensores não estiver com a frequência mencionada, verificar qual porta USB ele está conectado
+	
+	opções:
+	
+	a) Câmera RGB ximea: conectada na USB ao lado da fonte de energia e HDMI, ou no hub (usb, ethernet) -> usb-c
+	b) Câmera Thermal: conectada na USB ao lado da fonte de energia e HDMI, ou no hub (usb, ethernet) -> usb-c
+	c) velodyne: conectado no hub (usb, ethernet) -> usb-c
+	
+	Obs: não conectar sensores nas duas portas usb do lado direito do pc (as duas usb juntas), porque a velocidade 
+		delas não suportam a leitura dos sensores nas frequências desejadas
+	
+
+	

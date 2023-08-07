@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Thermal Camera -->
+  <include file="$(find dataset)/launch/flir_boson.launch" />
+  
+  <!-- RGB Camera-->
+  <include file="$(find dataset)/launch/ximea_rgb.launch" />
+  
+  <!-- PUCK 16-->
+  <!--include file="$(find dataset)/launch/VLP16_points.launch" /-->
+  
+  <!--Ouster 64-->
+  <include file="$(find dataset)/launch/ouster.launch">
+  	<arg name="sensor_hostname"  value="os-122212000760.local"/>
+  	<arg name="viz" value="false"/>
+    <arg name="timestamp_mode" value="TIME_FROM_ROS_TIME"/>
+  </include>
+  
+  <!-- Description -->
+  <include file="$(find dataset)/launch/description.launch"/>
+</launch>

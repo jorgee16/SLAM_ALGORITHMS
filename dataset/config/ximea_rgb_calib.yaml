@@ -1,0 +1,26 @@
+image_width: 1280
+image_height: 1024
+camera_name: ximea_cam2
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1171.67989,    0.     ,  642.8114 ,
+            0.     , 1173.33191,  518.77689,
+            0.     ,    0.     ,    1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.330286, 0.136534, -0.000125, -0.000248, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1049.17798,    0.     ,  642.56706,    0.     ,
+            0.     , 1095.33777,  519.13915,    0.     ,
+            0.     ,    0.     ,    1.     ,    0.     ]

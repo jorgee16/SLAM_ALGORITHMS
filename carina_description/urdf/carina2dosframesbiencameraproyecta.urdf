@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot name="multipleshapes">
+
+
+
+  <link name="base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 2.33"/>
+      <geometry>
+         <mesh filename="package://carina_description/meshes/collada/carina2/carina2.dae"/>
+      </geometry>
+    </visual>
+  </link>
+
+ 
+
+  <joint name="base_link_bumblebee_joint" type="fixed">
+    <origin xyz="-1.80 0 1.49" rpy="-1.57 0.0  -1.57" />
+      <parent link="base_link"/>
+    <child link="bumblebee"/>  
+  </joint>
+
+  <link name="bumblebee">
+    <inertial>
+      <mass value="2" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0474 0.157 0.036"/>
+      </geometry>
+      <material name="Gold">
+        <color rgba="0.878 0.690 0.356 1"/>
+      </material>
+    </visual>
+  </link>
+
+ 
+
+
+
+</robot>

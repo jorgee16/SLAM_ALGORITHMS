@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <arg name="rvizconfig" default="$(find carina_description)/rviz/rviz.rviz" />
+  <!-- send carina.urdf to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro $(find carina_description)/urdf/carina2.urdf" />
+  
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  <!--node pkg="tf2_ros" type="static_transform_publisher" name="basefootprint_to_baselink_broadcaster" args="0 0 0 0 0 0 1 base_footprint base_link" /-->
+  <!--node pkg="tf2_ros" type="static_transform_publisher" name="map_to_baselink_broadcaster" args="-60 -60 0 0 0 0 1 base_link map" /-->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>

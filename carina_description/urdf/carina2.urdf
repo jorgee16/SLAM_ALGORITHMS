@@ -1,0 +1,191 @@
+<?xml version="1.0"?>
+<robot  xmlns:xacro="http://ros.org/wiki/xacro" name="carina2">
+<xacro:property name="PI" value="3.1415926535897931" />
+
+  <link name="base_link"></link>
+
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="1.35 0 0.35" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="chassi_link" />
+  </joint>
+
+  <link name="chassi_link">
+    <visual>
+      <origin rpy="0 ${PI/2} ${PI}" xyz="0 0 0"/>
+      <geometry>
+         <mesh filename="package://carina_description/meshes/Ford_fusion.obj" scale="0.0098 0.0098 0.0098"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_velodyne_joint" type="fixed">
+    <origin xyz="1.04 0 1.86" rpy="0 0 0" />
+      <parent link="base_link"/>
+    <child link="os_sensor"/>  
+  </joint>
+
+  <link name="os_sensor">
+    <inertial>
+      <mass value="2" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04265" length="0.14"/>
+      </geometry>
+      <material name="Gray">
+        <color rgba="0.545 0.545 0.537 1"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.14"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- <joint name="base_link_bumblebee_joint" type="fixed">
+    <origin xyz="-0.30 0 1.49" rpy="-1.57 0.0 -1.57" />
+      <parent link="base_link"/>
+    <child link="stereo"/>  
+  </joint>
+
+  <link name="stereo">
+    <inertial>
+      <mass value="2" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0.0 0 1.57" />
+      <geometry>
+        <box size="0.0474 0.157 0.036"/>
+      </geometry>
+      <material name="Gold">
+        <color rgba="0.878 0.690 0.356 1"/>
+      </material>
+    </visual>
+  </link> -->
+
+  <joint name="base_link_imu_joint" type="fixed">
+    <origin xyz="0.34 0 1.55" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="imu_link"/>  
+  </joint>
+
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.058 0.050 0.032"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- <joint name="base_link_ladybug_joint" type="fixed">
+    <origin xyz="-1.14 0 1.84" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="ladybug_link"/>  
+  </joint>
+
+  <link name="ladybug_link">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.058 0.050 0.032"/>
+      </geometry>
+      <material name="Red">
+        <color rgba="255 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link> -->
+
+  <joint name="base_link_gps_joint" type="fixed">
+    <origin xyz="0.50 0 1.652" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="gps"/>
+  </joint>
+
+  <link name="gps">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.058 0.050 0.032"/>
+      </geometry>
+      <material name="darkgray">
+        <color rgba="0.3 0.3 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+<!-- 
+  <joint name="base_link_radar_joint" type="fixed">
+
+   <origin xyz="2.05 0 0.40" rpy="0 0 0" /> 
+     <origin xyz="2.03 0.0 0.35 " rpy="0 0 0" />
+      <parent link="base_link"/>
+    <child link="radaresr1"/>  
+  </joint>
+
+  <link name="radaresr1">
+    <inertial>
+      <mass value="2" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0492 0.132 0.0902"/>
+      </geometry>
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+  </link> -->
+
+</robot>
