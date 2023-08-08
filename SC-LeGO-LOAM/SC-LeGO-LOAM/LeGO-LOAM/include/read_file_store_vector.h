@@ -44,9 +44,10 @@ class LOOPS_FROM_FILE
         int indexes(std::vector<std::vector<int>> index, int cur_frame_id);
         float scores(std::vector<std::vector<float>> score, int cur_frame_id);
         std::pair<int, float> detectLoopClosureID(); // int: nearest node index, float: relative yaw  
-        int checkBUFFER(int loop_id, float min_score);
+        // int checkBUFFER(int loop_id, float min_score);
 
-        void store_indexes(int SC_idx, int frame);
+        void store_indexes(int SC_idx);
+        void save_indexes();
         
 
         // LOOPS_FROM_FILE():

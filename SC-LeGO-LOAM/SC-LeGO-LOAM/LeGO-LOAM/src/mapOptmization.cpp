@@ -242,7 +242,7 @@ private:
     bool loopclosureFlag, GT_flag;
     bool fusion;
     std::string filename1,filename2,filename3;
-    int PCD_counter,GT_idx;
+    int PCD_counter,GT_idx, contador;
 
     bool shouldShutdown = false;
     std::condition_variable cv;
@@ -308,8 +308,7 @@ public:
         
         //REDE TIAGO
     
-        PCD_counter = 0;
-        GT_idx = 0;
+
 
         ros::param::param<std::string>("/method", method, "SC");
         ros::param::param<std::string>("/file_prediction", filename1, "/home/joaojorge/Documents/relocalization/VLAD/prediction.txt");
@@ -344,10 +343,17 @@ public:
         //         filename2 = "/home/joaojorge/Documents/relocalization/GEM/similarity.txt";
         //         break;
         // }
-        if(method == "ficheiro" || method == "fusion")
+        if(method == "ficheiro" || method == "fusion"){
             loops_rede.read_file(filename1,filename2);
-            if (GT_flag == true)
+            if(GT_flag == true)
                 loops_rede.read_GT(filename3);
+        }
+        else{
+            if(GT_flag == true)
+                loops_rede.read_GT(filename3);
+        }
+            
+
     }
  
     void allocateMemory(){
@@ -411,6 +417,13 @@ public:
         timeLaserOdometry = 0;
         timeLaserCloudOutlierLast = 0;
         timeLastGloalMapPublish = 0;
+
+        // ALTERACOES
+        loops_rede.frame_id = 0;
+        PCD_counter = 0;
+        GT_idx = 0;
+        contador = 0;
+        // FIM DE ALTERACOES
 
         timeLastProcessing = -1;
 
@@ -711,11 +724,10 @@ public:
         laserCloudRaw->clear();
         pcl::fromROSMsg(*msg, *laserCloudRaw);
         // REDE TIAGO
-        if(method == "ficheiro" || method == "fusion"){
-            // std::cout << "cheguei aqui" << endl;
-            loops_rede.makeAndSaveScancontextAndKeys(*laserCloudRaw);
-            // std::cout << "GLOBAL FRAME_ID: " << loops_rede.frame_id-1 << endl;
-        }
+        loops_rede.makeAndSaveScancontextAndKeys(*laserCloudRaw);
+        // if(method == "ficheiro" || method == "fusion"){
+        //     loops_rede.makeAndSaveScancontextAndKeys(*laserCloudRaw);
+        // }
     }
 
     void laserCloudCornerLastHandler(const sensor_msgs::PointCloud2ConstPtr& msg){
@@ -852,50 +864,7 @@ public:
         }
     }
 
-    void visualizeGlobalMapThread(){
-        ros::Rate rate(0.2);
-        while (ros::ok()){
-            rate.sleep();
-            publishGlobalMap();
-        }
-
-        // ros::Rate delay(1); 
-        // delay.sleep();
-
-        const std::string kitti_format_pg_filename {"/tmp/optimized_poses.txt"};
-        saveOptimizedVerticesKITTIformat(isamCurrentEstimate, kitti_format_pg_filename);
-        std::cout << "SAVING optimized poses" << endl;
-        // save final point cloud
-        pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
-        // pcl::io::savePCDFileASCII("/home/joaojorge/Documents/finalCloud.pcd",*globalMapKeyFramesDS);
-
-        std::cout << "SAVING PCDS" << endl;
-        string cornerMapString = "/home/joaojorge/Documents/cornerMap.pcd";
-        string surfaceMapString = "/home/joaojorge/Documents/surfaceMap.pcd";
-        string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
-
-        pcl::PointCloud<PointType>::Ptr cornerMapCloud(new pcl::PointCloud<PointType>());
-        pcl::PointCloud<PointType>::Ptr cornerMapCloudDS(new pcl::PointCloud<PointType>());
-        pcl::PointCloud<PointType>::Ptr surfaceMapCloud(new pcl::PointCloud<PointType>());
-        pcl::PointCloud<PointType>::Ptr surfaceMapCloudDS(new pcl::PointCloud<PointType>());
-        
-        for(int i = 0; i < cornerCloudKeyFrames.size(); i++) {
-            *cornerMapCloud  += *transformPointCloud(cornerCloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
-    	    *surfaceMapCloud += *transformPointCloud(surfCloudKeyFrames[i],     &cloudKeyPoses6D->points[i]);
-    	    *surfaceMapCloud += *transformPointCloud(outlierCloudKeyFrames[i],  &cloudKeyPoses6D->points[i]);
-        }
-
-        downSizeFilterCorner.setInputCloud(cornerMapCloud);
-        downSizeFilterCorner.filter(*cornerMapCloudDS);
-        downSizeFilterSurf.setInputCloud(surfaceMapCloud);
-        downSizeFilterSurf.filter(*surfaceMapCloudDS);
-
-        pcl::io::savePCDFileASCII(fileDirectory+"cornerMap.pcd", *cornerMapCloudDS);
-        pcl::io::savePCDFileASCII(fileDirectory+"surfaceMap.pcd", *surfaceMapCloudDS);
-        pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
-
-    }
-    void savePointCloud()
+        void savePointCloud()
     {
         // save final point cloud
         pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
@@ -928,10 +897,12 @@ public:
     }
 
     void save_indexes(){
-        if(GT_flag == true){
             std::ofstream outputFile("/home/joaojorge/INDEXES.txt");
+
+            // std::cout << "Tamanho do SC INDEX: " << loops_rede.SC_INDEX.size()
             if (outputFile.is_open()){
                 // Write ground truth and scan context output indexes to the file
+                std::cout << "TAMANHO GT_INDEX: " << loops_rede.GT_INDEX.size() << std::endl;
                 for (int i = 0; i < loops_rede.GT_INDEX.size() && i < loops_rede.SC_INDEX.size(); ++i) {
                     outputFile << loops_rede.GT_INDEX[i] << " " << loops_rede.SC_INDEX[i] << '\n';
                 }
@@ -944,9 +915,54 @@ public:
                 std::cout << "Error opening the file." << std::endl;
             }
             
-        }
         return;
     }
+
+    void visualizeGlobalMapThread(){
+        ros::Rate rate(0.2);
+        while (ros::ok()){
+            rate.sleep();
+            publishGlobalMap();
+        }
+
+        // ros::Rate delay(1); 
+        // delay.sleep();
+
+        // const std::string kitti_format_pg_filename {"/tmp/optimized_poses.txt"};
+        // saveOptimizedVerticesKITTIformat(isamCurrentEstimate, kitti_format_pg_filename);
+        // std::cout << "SAVING optimized poses" << endl;
+        // // save final point cloud
+        // pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
+        // // pcl::io::savePCDFileASCII("/home/joaojorge/Documents/finalCloud.pcd",*globalMapKeyFramesDS);
+
+        // std::cout << "SAVING PCDS" << endl;
+        // string cornerMapString = "/home/joaojorge/Documents/cornerMap.pcd";
+        // string surfaceMapString = "/home/joaojorge/Documents/surfaceMap.pcd";
+        // string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
+
+        // pcl::PointCloud<PointType>::Ptr cornerMapCloud(new pcl::PointCloud<PointType>());
+        // pcl::PointCloud<PointType>::Ptr cornerMapCloudDS(new pcl::PointCloud<PointType>());
+        // pcl::PointCloud<PointType>::Ptr surfaceMapCloud(new pcl::PointCloud<PointType>());
+        // pcl::PointCloud<PointType>::Ptr surfaceMapCloudDS(new pcl::PointCloud<PointType>());
+        
+        // for(int i = 0; i < cornerCloudKeyFrames.size(); i++) {
+        //     *cornerMapCloud  += *transformPointCloud(cornerCloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
+    	//     *surfaceMapCloud += *transformPointCloud(surfCloudKeyFrames[i],     &cloudKeyPoses6D->points[i]);
+    	//     *surfaceMapCloud += *transformPointCloud(outlierCloudKeyFrames[i],  &cloudKeyPoses6D->points[i]);
+        // }
+
+        // downSizeFilterCorner.setInputCloud(cornerMapCloud);
+        // downSizeFilterCorner.filter(*cornerMapCloudDS);
+        // downSizeFilterSurf.setInputCloud(surfaceMapCloud);
+        // downSizeFilterSurf.filter(*surfaceMapCloudDS);
+
+        // pcl::io::savePCDFileASCII(fileDirectory+"cornerMap.pcd", *cornerMapCloudDS);
+        // pcl::io::savePCDFileASCII(fileDirectory+"surfaceMap.pcd", *surfaceMapCloudDS);
+        // pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
+        save_indexes();
+
+    }
+
 
     void publishGlobalMap(){
 
@@ -1098,27 +1114,56 @@ public:
         latestFrameIDLoopCloure = cloudKeyPoses3D->points.size() - 1;
         SCclosestHistoryFrameID = -1; // init with -1
 
+        std::cout << "FRAME ID: " << loops_rede.frame_id << std::endl;
         // *****************   SC   ******************
         if(method == "SC"){
-            std::cout << "latestFrameIDLoopCloure: " << latestFrameIDLoopCloure << endl;
+            
+            // std::cout << "latestFrameIDLoopCloure: " << latestFrameIDLoopCloure << endl;
             auto detectResult = scManager.detectLoopClosureID(); // first: nn index, second: yaw diff 
             SCclosestHistoryFrameID = detectResult.first;
             yawDiffRad = detectResult.second; // not use for v1 (because pcl icp withi initial somthing wrong...)
 
-            // loops_rede.store_indexes(SCclosestHistoryFrameID, loops_rede.frame_id);
-            loops_rede.SC_INDEX.push_back(SCclosestHistoryFrameID);
-            GT_idx = loops_rede.indexes(loops_rede.LOOPS_INDEX_GT,latestFrameIDLoopCloure);
-            loops_rede.GT_INDEX.push_back(GT_idx);
+            // std::cout << "ANTES DO STORE INDEXES" << std::endl;
+            
+            // if(GT_flag== true)
+            // std::lock_guard<std::mutex> lock(mtx);
+            loops_rede.store_indexes(SCclosestHistoryFrameID);
+
+            // if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX_GT.size()){
+            //     // SCclosestHistoryFrameID = -1;
+            //     loops_rede.save_indexes();
+            // }
+                // Salvar num ficheiro, para cada frame 2 indices candidatos: 1 dado pelo SC outro é Ground Truth
+                // Estou apenas a considerar os os frames sobre o qual ele faz efetivamente o loop closure, que corresponde 
+                // apenas a 10% do numero de frames -> 1 Hz
+                // save_indexes()
+
+            // loops_rede.SC_INDEX.push_back(SCclosestHistoryFrameID);
+            // std::cout << SC_INDEX[contador] << std::endl;
+            // std::cout << "DEPOIS DO STORE INDEXES" << std::endl;
+            // GT_idx = loops_rede.indexes(loops_rede.LOOPS_INDEX_GT,latestFrameIDLoopCloure);
+            // loops_rede.GT_INDEX.push_back(GT_idx);
+
+            // contador++;
 
         }
         // ******************  REDE TIAGO   ******************
         else if(method == "ficheiro"){
-            // loops_rede.LOOP_BUFFER_FILTERED.push_back(latestFrameIDLoopCloure);
-            // loops_rede.LOOP_BUFFER_GLOBAL.push_back(loops_rede.frame_id);
+            std::cout << "FRAME ID: " << loops_rede.frame_id << std::endl;
+            if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX.size()){
+                // savePointCloud();
+                // save_indexes();
 
-            auto detectResult = loops_rede.detectLoopClosureID();
-            SCclosestHistoryFrameID = detectResult.first;
-            min_score= detectResult.second;
+                RedeclosestHistoryFrameID = -1;
+                min_score= 0;
+
+            }
+            else{
+                auto detectResult = loops_rede.detectLoopClosureID();
+                SCclosestHistoryFrameID = detectResult.first;
+                min_score= detectResult.second;
+            }
+
             
             // std::cout << "LOCAL Frame ID LOOP CLOSURE: " << latestFrameIDLoopCloure << endl;
             // std::cout << "Number of PCD's stored in buffer: " << PCD_counter << endl;
@@ -1135,8 +1180,6 @@ public:
         else{
             
             // *********************  FUSAO SC E REDE  ***************************
-
-            // std::cout << "CHEGUEI " << endl;
             auto detectResult = scManager.detectLoopClosureID(); 
             SCclosestHistoryFrameID = detectResult.first;
             yawDiffRad = detectResult.second;
@@ -1144,7 +1187,7 @@ public:
 
             if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX.size()){
                 // savePointCloud();
-                save_indexes();
+                // save_indexes();
                 // std::cout << "SAVING PCD." << std::endl;
                 RedeclosestHistoryFrameID = -1;
                 min_score= 0;
@@ -2260,6 +2303,11 @@ public:
             if( usingRawCloud ) { // v2 uses downsampled raw point cloud, more fruitful height information than using feature points (v1)
                 pcl::PointCloud<PointType>::Ptr thisRawCloudKeyFrame(new pcl::PointCloud<PointType>());
                 pcl::copyPointCloud(*laserCloudRawDS,  *thisRawCloudKeyFrame);
+                if(GT_flag == true) {
+                    loops_rede.LOOP_BUFFER_FILTERED.push_back(PCD_counter);
+                    loops_rede.LOOP_BUFFER_GLOBAL.push_back(loops_rede.frame_id);
+                    PCD_counter++; 
+                }
 
                 scManager.makeAndSaveScancontextAndKeys(*thisRawCloudKeyFrame);        
             }
@@ -2399,9 +2447,12 @@ int main(int argc, char** argv)
         rate.sleep();
     }
     
-    // MO.savePointCloud();
+    // 
+
     loopthread.join();
     visualizeMapThread.join();
+
+    // MO.save_indexes();
 
     return 0;
 }
