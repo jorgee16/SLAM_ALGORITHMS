@@ -896,27 +896,27 @@ public:
         pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
     }
 
-    void save_indexes(){
-            std::ofstream outputFile("/home/joaojorge/INDEXES.txt");
+    // void save_indexes(){
+    //         std::ofstream outputFile("/home/joaojorge/INDEXES.txt");
 
-            // std::cout << "Tamanho do SC INDEX: " << loops_rede.SC_INDEX.size()
-            if (outputFile.is_open()){
-                // Write ground truth and scan context output indexes to the file
-                std::cout << "TAMANHO GT_INDEX: " << loops_rede.GT_INDEX.size() << std::endl;
-                for (int i = 0; i < loops_rede.GT_INDEX.size() && i < loops_rede.SC_INDEX.size(); ++i) {
-                    outputFile << loops_rede.GT_INDEX[i] << " " << loops_rede.SC_INDEX[i] << '\n';
-                }
+    //         // std::cout << "Tamanho do SC INDEX: " << loops_rede.INDEX.size()
+    //         if (outputFile.is_open()){
+    //             // Write ground truth and scan context output indexes to the file
+    //             std::cout << "TAMANHO GT_INDEX: " << loops_rede.GT_INDEX.size() << std::endl;
+    //             for (int i = 0; i < loops_rede.GT_INDEX.size() && i < loops_rede.INDEX.size(); ++i) {
+    //                 outputFile << loops_rede.GT_INDEX[i] << " " << loops_rede.INDEX[i] << '\n';
+    //             }
 
-                // Close the file after writing
-                outputFile.close();
-                std::cout << "Data written to the file successfully." << std::endl;
-            } 
-            else {
-                std::cout << "Error opening the file." << std::endl;
-            }
+    //             // Close the file after writing
+    //             outputFile.close();
+    //             std::cout << "Data written to the file successfully." << std::endl;
+    //         } 
+    //         else {
+    //             std::cout << "Error opening the file." << std::endl;
+    //         }
             
-        return;
-    }
+    //     return;
+    // }
 
     void visualizeGlobalMapThread(){
         ros::Rate rate(0.2);
@@ -928,38 +928,38 @@ public:
         // ros::Rate delay(1); 
         // delay.sleep();
 
-        // const std::string kitti_format_pg_filename {"/tmp/optimized_poses.txt"};
-        // saveOptimizedVerticesKITTIformat(isamCurrentEstimate, kitti_format_pg_filename);
-        // std::cout << "SAVING optimized poses" << endl;
-        // // save final point cloud
-        // pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
-        // // pcl::io::savePCDFileASCII("/home/joaojorge/Documents/finalCloud.pcd",*globalMapKeyFramesDS);
+        const std::string kitti_format_pg_filename {"/tmp/optimized_poses.txt"};
+        saveOptimizedVerticesKITTIformat(isamCurrentEstimate, kitti_format_pg_filename);
+        std::cout << "SAVING optimized poses" << endl;
+        // save final point cloud
+        pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
+        // pcl::io::savePCDFileASCII("/home/joaojorge/Documents/finalCloud.pcd",*globalMapKeyFramesDS);
 
-        // std::cout << "SAVING PCDS" << endl;
-        // string cornerMapString = "/home/joaojorge/Documents/cornerMap.pcd";
-        // string surfaceMapString = "/home/joaojorge/Documents/surfaceMap.pcd";
-        // string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
+        std::cout << "SAVING PCDS" << endl;
+        string cornerMapString = "/home/joaojorge/Documents/cornerMap.pcd";
+        string surfaceMapString = "/home/joaojorge/Documents/surfaceMap.pcd";
+        string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
 
-        // pcl::PointCloud<PointType>::Ptr cornerMapCloud(new pcl::PointCloud<PointType>());
-        // pcl::PointCloud<PointType>::Ptr cornerMapCloudDS(new pcl::PointCloud<PointType>());
-        // pcl::PointCloud<PointType>::Ptr surfaceMapCloud(new pcl::PointCloud<PointType>());
-        // pcl::PointCloud<PointType>::Ptr surfaceMapCloudDS(new pcl::PointCloud<PointType>());
+        pcl::PointCloud<PointType>::Ptr cornerMapCloud(new pcl::PointCloud<PointType>());
+        pcl::PointCloud<PointType>::Ptr cornerMapCloudDS(new pcl::PointCloud<PointType>());
+        pcl::PointCloud<PointType>::Ptr surfaceMapCloud(new pcl::PointCloud<PointType>());
+        pcl::PointCloud<PointType>::Ptr surfaceMapCloudDS(new pcl::PointCloud<PointType>());
         
-        // for(int i = 0; i < cornerCloudKeyFrames.size(); i++) {
-        //     *cornerMapCloud  += *transformPointCloud(cornerCloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
-    	//     *surfaceMapCloud += *transformPointCloud(surfCloudKeyFrames[i],     &cloudKeyPoses6D->points[i]);
-    	//     *surfaceMapCloud += *transformPointCloud(outlierCloudKeyFrames[i],  &cloudKeyPoses6D->points[i]);
-        // }
+        for(int i = 0; i < cornerCloudKeyFrames.size(); i++) {
+            *cornerMapCloud  += *transformPointCloud(cornerCloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
+    	    *surfaceMapCloud += *transformPointCloud(surfCloudKeyFrames[i],     &cloudKeyPoses6D->points[i]);
+    	    *surfaceMapCloud += *transformPointCloud(outlierCloudKeyFrames[i],  &cloudKeyPoses6D->points[i]);
+        }
 
-        // downSizeFilterCorner.setInputCloud(cornerMapCloud);
-        // downSizeFilterCorner.filter(*cornerMapCloudDS);
-        // downSizeFilterSurf.setInputCloud(surfaceMapCloud);
-        // downSizeFilterSurf.filter(*surfaceMapCloudDS);
+        downSizeFilterCorner.setInputCloud(cornerMapCloud);
+        downSizeFilterCorner.filter(*cornerMapCloudDS);
+        downSizeFilterSurf.setInputCloud(surfaceMapCloud);
+        downSizeFilterSurf.filter(*surfaceMapCloudDS);
 
-        // pcl::io::savePCDFileASCII(fileDirectory+"cornerMap.pcd", *cornerMapCloudDS);
-        // pcl::io::savePCDFileASCII(fileDirectory+"surfaceMap.pcd", *surfaceMapCloudDS);
-        // pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
-        save_indexes();
+        pcl::io::savePCDFileASCII(fileDirectory+"cornerMap.pcd", *cornerMapCloudDS);
+        pcl::io::savePCDFileASCII(fileDirectory+"surfaceMap.pcd", *surfaceMapCloudDS);
+        pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
+        // save_indexes();
 
     }
 
@@ -1014,7 +1014,7 @@ public:
         if (loopclosureFlag == false)
             return;
         if(method == "ficheiro"){
-            ros::Rate rate(10);
+            ros::Rate rate(1);
             while (ros::ok()){
                 rate.sleep();
                 performLoopClosure();
@@ -1114,8 +1114,8 @@ public:
         latestFrameIDLoopCloure = cloudKeyPoses3D->points.size() - 1;
         SCclosestHistoryFrameID = -1; // init with -1
 
-        std::cout << "FRAME ID: " << loops_rede.frame_id << std::endl;
-        // *****************   SC   ******************
+        // std::cout << "FRAME ID: " << loops_rede.frame_id << std::endl;
+        // *****************   SCAN CONTEXT   ******************
         if(method == "SC"){
             
             // std::cout << "latestFrameIDLoopCloure: " << latestFrameIDLoopCloure << endl;
@@ -1127,19 +1127,21 @@ public:
             
             // if(GT_flag== true)
             // std::lock_guard<std::mutex> lock(mtx);
-            loops_rede.store_indexes(SCclosestHistoryFrameID);
 
             // if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX_GT.size()){
-            //     // SCclosestHistoryFrameID = -1;
-            //     loops_rede.save_indexes();
+            //     SCclosestHistoryFrameID = -1;
+            // }
+            // else{
+            //     loops_rede.store_indexes(SCclosestHistoryFrameID);
+                
             // }
                 // Salvar num ficheiro, para cada frame 2 indices candidatos: 1 dado pelo SC outro é Ground Truth
                 // Estou apenas a considerar os os frames sobre o qual ele faz efetivamente o loop closure, que corresponde 
                 // apenas a 10% do numero de frames -> 1 Hz
                 // save_indexes()
 
-            // loops_rede.SC_INDEX.push_back(SCclosestHistoryFrameID);
-            // std::cout << SC_INDEX[contador] << std::endl;
+            // loops_rede.INDEX.push_back(SCclosestHistoryFrameID);
+            // std::cout << INDEX[contador] << std::endl;
             // std::cout << "DEPOIS DO STORE INDEXES" << std::endl;
             // GT_idx = loops_rede.indexes(loops_rede.LOOPS_INDEX_GT,latestFrameIDLoopCloure);
             // loops_rede.GT_INDEX.push_back(GT_idx);
@@ -1147,12 +1149,10 @@ public:
             // contador++;
 
         }
-        // ******************  REDE TIAGO   ******************
+        // ******************  REDE TIAGO : LER DO FICHEIRO  ******************
         else if(method == "ficheiro"){
-            std::cout << "FRAME ID: " << loops_rede.frame_id << std::endl;
+            // std::cout << "FRAME ID: " << loops_rede.frame_id << std::endl;
             if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX.size()){
-                // savePointCloud();
-                // save_indexes();
 
                 RedeclosestHistoryFrameID = -1;
                 min_score= 0;
@@ -1160,8 +1160,9 @@ public:
             }
             else{
                 auto detectResult = loops_rede.detectLoopClosureID();
-                SCclosestHistoryFrameID = detectResult.first;
+                RedeclosestHistoryFrameID = detectResult.first;
                 min_score= detectResult.second;
+                std::cout << "RedeclosestHistoryFrameID: " << RedeclosestHistoryFrameID << std::endl;
             }
 
             
@@ -1196,7 +1197,7 @@ public:
             else{
                 auto Result = loops_rede.detectLoopClosureID();
                 RedeclosestHistoryFrameID = Result.first;
-                std::cout << "RedeclosestHistoryFrameID: " << RedeclosestHistoryFrameID << std::endl;
+                // std::cout << "RedeclosestHistoryFrameID: " << RedeclosestHistoryFrameID << std::endl;
                 min_score= Result.second;
             }
         }
@@ -1217,14 +1218,21 @@ public:
         // if all close, reject
 
         // **************************  SAVE LATEST AND HISTORY KEY FRAMES *******************************************
-        if(method!="fusion"){
+
+        // ***********************************************  SCAN CONTEXT   ***********************************************************
+        if(method == "SC"){
+
             if (SCclosestHistoryFrameID == -1){ 
+                int SC_ICP_idx = -1;
+                loops_rede.ICP_INDEX.push_back(-1);
+
+                loops_rede.store_indexes(SCclosestHistoryFrameID, SC_ICP_idx);
+                loops_rede.save_indexes();
                 return false;
             }
-
-        // save latest key frames: query ptcloud (corner points + surface points)
-        // NOTE: using "closestHistoryFrameID" to make same root of submap points to get a direct relative between the query point cloud (latestSurfKeyFrameCloud) and the map (nearHistorySurfKeyFrameCloud). by giseop
-        // i.e., set the query point cloud within mapside's local coordinate
+             // save latest key frames: query ptcloud (corner points + surface points)
+            // NOTE: using "closestHistoryFrameID" to make same root of submap points to get a direct relative between the query point cloud (latestSurfKeyFrameCloud) and the map (nearHistorySurfKeyFrameCloud). by giseop
+            // i.e., set the query point cloud within mapside's local coordinate
             *SClatestSurfKeyFrameCloud += *transformPointCloud(cornerCloudKeyFrames[latestFrameIDLoopCloure], &cloudKeyPoses6D->points[SCclosestHistoryFrameID]);         
             *SClatestSurfKeyFrameCloud += *transformPointCloud(surfCloudKeyFrames[latestFrameIDLoopCloure],   &cloudKeyPoses6D->points[SCclosestHistoryFrameID]); 
 
@@ -1247,16 +1255,48 @@ public:
             }
             downSizeFilterHistoryKeyFrames.setInputCloud(SCnearHistorySurfKeyFrameCloud);
             downSizeFilterHistoryKeyFrames.filter(*SCnearHistorySurfKeyFrameCloudDS);
-
-            // // optional: publish history near key frames
-            // if (pubHistoryKeyFrames.getNumSubscribers() != 0){
-            //     sensor_msgs::PointCloud2 cloudMsgTemp;
-            //     pcl::toROSMsg(*nearHistorySurfKeyFrameCloudDS, cloudMsgTemp);
-            //     cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            //     cloudMsgTemp.header.frame_id = "/camera_init";
-            //     pubHistoryKeyFrames.publish(cloudMsgTemp);
-            // }
         }
+        // ***********************************************  SE FOR LER DO FICHEIRO   ***********************************************************
+        else if (method == "ficheiro"){
+            if (RedeclosestHistoryFrameID == -1){ 
+                if(GT_flag == true){
+                    int REDE_ICP_idx = -1;
+                    loops_rede.ICP_INDEX.push_back(-1);
+
+                    loops_rede.store_indexes(RedeclosestHistoryFrameID, REDE_ICP_idx);
+                    loops_rede.save_indexes();
+                }
+                return false;
+            }
+            *RedelatestSurfKeyFrameCloud += *transformPointCloud(cornerCloudKeyFrames[latestFrameIDLoopCloure], &cloudKeyPoses6D->points[RedeclosestHistoryFrameID]);         
+            *RedelatestSurfKeyFrameCloud += *transformPointCloud(surfCloudKeyFrames[latestFrameIDLoopCloure],   &cloudKeyPoses6D->points[RedeclosestHistoryFrameID]); 
+
+            pcl::PointCloud<PointType>::Ptr RedehahaCloud(new pcl::PointCloud<PointType>());
+
+            int cloudSizeRede = RedelatestSurfKeyFrameCloud->points.size();
+
+            for (int i = 0; i < cloudSizeRede; ++i){
+                if ((int)RedelatestSurfKeyFrameCloud->points[i].intensity >= 0){
+                    RedehahaCloud->push_back(RedelatestSurfKeyFrameCloud->points[i]);
+                }
+            }
+
+            RedelatestSurfKeyFrameCloud->clear();
+            *RedelatestSurfKeyFrameCloud = *RedehahaCloud;
+
+        // save history near key frames: map ptcloud (icp to query ptcloud)
+            for (int j = -historyKeyframeSearchNum; j <= historyKeyframeSearchNum; ++j){
+                if (RedeclosestHistoryFrameID + j < 0 || RedeclosestHistoryFrameID + j > latestFrameIDLoopCloure)
+                    continue;
+                *RedenearHistorySurfKeyFrameCloud += *transformPointCloud(cornerCloudKeyFrames[RedeclosestHistoryFrameID+j], &cloudKeyPoses6D->points[RedeclosestHistoryFrameID+j]);
+                *RedenearHistorySurfKeyFrameCloud += *transformPointCloud(surfCloudKeyFrames[RedeclosestHistoryFrameID+j],   &cloudKeyPoses6D->points[RedeclosestHistoryFrameID+j]);
+            }
+
+            downSizeFilterHistoryKeyFrames.setInputCloud(RedenearHistorySurfKeyFrameCloud);
+            downSizeFilterHistoryKeyFrames.filter(*RedenearHistorySurfKeyFrameCloudDS);
+        }
+
+        // ***********************************************   SE FOR METODO DE FUSAO   **************************************************************
         else{
             if (SCclosestHistoryFrameID == -1 && RedeclosestHistoryFrameID == -1){ 
                 return false;
@@ -1487,9 +1527,9 @@ public:
         }
 
         /*
-         * 2. SC loop factor (scan context)
+         * 2. SC loop factor (scan context) - feature based
          */
-        if(method != "fusion"){
+        if(method == "SC"){
             if( SCclosestHistoryFrameID != -1 ) {
                 pcl::IterativeClosestPoint<PointType, PointType> icp;
                 icp.setMaxCorrespondenceDistance(100);
@@ -1506,30 +1546,27 @@ public:
                 pcl::PointCloud<PointType>::Ptr unused_result(new pcl::PointCloud<PointType>());
                 icp.align(*unused_result); 
                 // icp.align(*unused_result, icpInitialMat); // PCL icp non-eye initial is bad ... don't use (LeGO LOAM author also said pcl transform is weird.)
-                if(method == "SC"){
-                    std::cout << "[SC] ICP fit score: " << icp.getFitnessScore() << std::endl;
-                    if ( icp.hasConverged() == false || icp.getFitnessScore() > historyKeyframeFitnessScore ) {
-                        std::cout << "[SC] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
-                        isValidSCloopFactor = false;
-                    }
-                    else {
-                        std::cout << "[SC] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and SC nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
-                        isValidSCloopFactor = true;
-                    }
+                    
+                std::cout << "[SC] ICP fit score: " << icp.getFitnessScore() << std::endl;
+                if ( icp.hasConverged() == false || icp.getFitnessScore() > historyKeyframeFitnessScore ) {
+                    std::cout << "[SC] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
+                    loops_rede.ICP_INDEX.push_back(-1);
+                    int SC_ICP_idx = -1;
+
+                    loops_rede.store_indexes(SCclosestHistoryFrameID, SC_ICP_idx);
+                    loops_rede.save_indexes();
+                    
+                    isValidSCloopFactor = false;
                 }
-                else{
-                    std::cout << "[REDE] ICP fit score: " << icp.getFitnessScore() << std::endl;
-                    if ( icp.hasConverged() == false || icp.getFitnessScore() > historyKeyframeFitnessScore ) {
-                        std::cout << "[REDE] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
-                        isValidSCloopFactor = false;
-                    }
-                    else {
-                        std::cout << "[REDE] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and REDE nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
-                        isValidSCloopFactor = true;
-                    }
+                else {
+                    loops_rede.ICP_INDEX.push_back(SCclosestHistoryFrameID);
+
+                    loops_rede.store_indexes(SCclosestHistoryFrameID, SCclosestHistoryFrameID);
+                    loops_rede.save_indexes();
+
+                    std::cout << "[SC] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and SC nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
+                    isValidSCloopFactor = true;
                 }
-                
-                
 
                 if( isValidSCloopFactor == true ) {
                     correctionCameraFrame = icp.getFinalTransformation(); // get transformation in camera frame (because points are in camera frame)
@@ -1546,6 +1583,75 @@ public:
                 }
             }
         }
+
+        // ********************************************  APLICAR ICP NOS LEARNED LOOP DETECTORS  *****************************************************
+         /*
+         * 3. Learned algorithms using LIDAR:  VLAD,GEM,ORCHNET
+         */
+        else if(method == "ficheiro"){
+            if(RedeclosestHistoryFrameID != -1) {
+                pcl::IterativeClosestPoint<PointType, PointType> icp;
+                icp.setMaxCorrespondenceDistance(100);
+                icp.setMaximumIterations(100);
+                icp.setTransformationEpsilon(1e-6);
+                icp.setEuclideanFitnessEpsilon(1e-6);
+                icp.setRANSACIterations(0);
+
+                // Align clouds
+                // Eigen::Affine3f icpInitialMatFoo = pcl::getTransformation(0, 0, 0, yawDiffRad, 0, 0); // because within cam coord: (z, x, y, yaw, roll, pitch)
+                // Eigen::Matrix4f icpInitialMat = icpInitialMatFoo.matrix();
+                icp.setInputSource(RedelatestSurfKeyFrameCloud);
+                icp.setInputTarget(RedenearHistorySurfKeyFrameCloudDS);
+                pcl::PointCloud<PointType>::Ptr unused_result(new pcl::PointCloud<PointType>());
+                icp.align(*unused_result); 
+                std::cout << "[REDE] ICP fit score: " << icp.getFitnessScore() << std::endl;
+
+                if ( icp.hasConverged() == false || icp.getFitnessScore() > historyKeyframeFitnessScore ) {
+                    if(GT_flag == true){
+
+                        loops_rede.ICP_INDEX.push_back(-1);
+                        int REDE_ICP_idx = -1;
+
+                        loops_rede.store_indexes(RedeclosestHistoryFrameID, REDE_ICP_idx);
+                        loops_rede.save_indexes();
+                    }
+                    std::cout << "[REDE] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
+                    isValidRedeloopFactor = false;
+                }
+                else {
+                    if(GT_flag == true){
+
+                        loops_rede.ICP_INDEX.push_back(RedeclosestHistoryFrameID);
+
+                        loops_rede.store_indexes(RedeclosestHistoryFrameID, RedeclosestHistoryFrameID);
+                        loops_rede.save_indexes();
+
+                    }
+                    std::cout << "[REDE] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and REDE nearest [ " << RedeclosestHistoryFrameID << " ]" << std::endl;
+                    isValidRedeloopFactor = true;
+                }
+
+
+                if( isValidRedeloopFactor == true ) {
+                    correctionCameraFrame = icp.getFinalTransformation(); // get transformation in lidar frame (because points are in lidar frame)
+                    pcl::getTranslationAndEulerAngles (correctionCameraFrame, x, y, z, roll, pitch, yaw);
+                    gtsam::Pose3 poseFrom = Pose3(Rot3::RzRyRx(roll, pitch, yaw), Point3(x, y, z));
+                    gtsam::Pose3 poseTo = Pose3(Rot3::RzRyRx(0.0, 0.0, 0.0), Point3(0.0, 0.0, 0.0));
+                    
+                    std::lock_guard<std::mutex> lock(mtx);
+                    // gtSAMgraph.add(BetweenFactor<Pose3>(latestFrameIDLoopCloure, closestHistoryFrameID, poseFrom.between(poseTo), constraintNoise)); // original 
+                    gtSAMgraph.add(BetweenFactor<Pose3>(latestFrameIDLoopCloure, RedeclosestHistoryFrameID, poseFrom.between(poseTo), robustNoiseModel)); // giseop
+                    isam->update(gtSAMgraph);
+                    isam->update();
+                    gtSAMgraph.resize(0);
+                }
+            }
+        }
+
+        // **********************************************      APLICAR ICP NA FUSAO  ****************************************************
+         /*
+         * 4. FUSION (scan context) + learned loop detection algorithm (VLAD, ORCHNET)
+         */
         else{
             if( SCclosestHistoryFrameID == -1 && RedeclosestHistoryFrameID != -1) {
                 pcl::IterativeClosestPoint<PointType, PointType> icp;
@@ -1583,7 +1689,7 @@ public:
                     
                     std::lock_guard<std::mutex> lock(mtx);
                     // gtSAMgraph.add(BetweenFactor<Pose3>(latestFrameIDLoopCloure, closestHistoryFrameID, poseFrom.between(poseTo), constraintNoise)); // original 
-                    gtSAMgraph.add(BetweenFactor<Pose3>(latestFrameIDLoopCloure, SCclosestHistoryFrameID, poseFrom.between(poseTo), robustNoiseModel)); // giseop
+                    gtSAMgraph.add(BetweenFactor<Pose3>(latestFrameIDLoopCloure, RedeclosestHistoryFrameID, poseFrom.between(poseTo), robustNoiseModel)); // giseop
                     isam->update(gtSAMgraph);
                     isam->update();
                     gtSAMgraph.resize(0);
@@ -1764,6 +1870,8 @@ public:
             }
         }
 
+        
+        // loops_rede.save_ICP_INDEX();
         // just for visualization
         // // publish corrected cloud
         // if (pubIcpKeyFrames.getNumSubscribers() != 0){
@@ -2205,7 +2313,7 @@ public:
         bool saveThisKeyFrame = true;
         if (sqrt((previousRobotPosPoint.x-currentRobotPosPoint.x)*(previousRobotPosPoint.x-currentRobotPosPoint.x)
                 +(previousRobotPosPoint.y-currentRobotPosPoint.y)*(previousRobotPosPoint.y-currentRobotPosPoint.y)
-                +(previousRobotPosPoint.z-currentRobotPosPoint.z)*(previousRobotPosPoint.z-currentRobotPosPoint.z)) < 0.3){ // save keyframe every 0.3 meter 
+                +(previousRobotPosPoint.z-currentRobotPosPoint.z)*(previousRobotPosPoint.z-currentRobotPosPoint.z)) < 0.1){ // save keyframe every 0.3 meter 
             saveThisKeyFrame = false;
         }
         if (saveThisKeyFrame == false && !cloudKeyPoses3D->points.empty())
@@ -2318,10 +2426,11 @@ public:
             }
         }
         else if(method == "ficheiro"){
+            
             loops_rede.LOOP_BUFFER_FILTERED.push_back(PCD_counter);
             loops_rede.LOOP_BUFFER_GLOBAL.push_back(loops_rede.frame_id);
-            std::cout << "PCD stored in local buffer frameID: " << PCD_counter << endl;
-            std::cout << "PCD stored in global buffer frameID: " << loops_rede.frame_id<< endl;
+            // std::cout << "PCD stored in local buffer frameID: " << PCD_counter << endl;
+            // std::cout << "PCD stored in global buffer frameID: " << loops_rede.frame_id<< endl;
             PCD_counter++; 
         }
 

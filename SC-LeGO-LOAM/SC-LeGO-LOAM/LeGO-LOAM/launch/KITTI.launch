@@ -19,7 +19,7 @@
 
     <!---         PARAMETERS               -->
 
-    <param name="method" type="str" value="SC" />
+    <param name="method" type="str" value="ficheiro" />
 
 
     <!--           METHODS               -->

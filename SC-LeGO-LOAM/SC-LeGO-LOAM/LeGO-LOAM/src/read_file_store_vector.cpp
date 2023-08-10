@@ -170,15 +170,11 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
      */
     
     std::cout << "FRAME ID: " << frame_id << std::endl;
-    // std::cout << "frame_id: " << frame_id << std::endl;
+
     if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX[frame_id]) == false)
     {
-        // std::pair<int, float> result {loop_id, 0.0};
-        // return result; // Early return 
         return std::make_pair(-1,0.0);
     }
-    // std::vector<int> candidates_cur_frame;
-    // std::vector <float> scores_cur_frame;
 
     float min_score;
     int nn_idx;
@@ -188,43 +184,72 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
 
     int counter = 0;
 
-    for (unsigned long i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
-        if (nn_idx == LOOP_BUFFER_GLOBAL[i]){
 
-            if(min_score < 0.35){
-                std::cout.precision(3); 
-                std::cout << "[Loop found] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
-                
-                return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
-            }
-            else{
-                std::cout.precision(3); 
-                std::cout << "[Not loop] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
-                return std::make_pair(-1,min_score);
-            }
-                
-        }
-        counter++;
-            // std::cout << "Counter: " << counter << std::endl;
-    }
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%   testar outra maneira mais eficiente de procurar o frame no buffer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    std::unordered_map<int, int> valueToIndex;
     
+    for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); ++i) {
+        valueToIndex[LOOP_BUFFER_GLOBAL[i]] = i;
+    }
+
+    auto it = valueToIndex.find(nn_idx);
+    if (it != valueToIndex.end()) {
+        int index;
+        index = it->second;
+        std::cout << "REDE_INDEX: " << index << '\n';
+        if(min_score < 0.5){
+        
+            std::cout.precision(3); 
+            // std::cout << "[Loop found] Minimum Score: " << min_score << " between " << LOOP_BUFFER_FILTERED.back() << " and " << LOOP_BUFFER_FILTERED[index] << "." << std::endl;
+            
+            return std::make_pair(LOOP_BUFFER_FILTERED[index],min_score);
+        }
+        else{
+            std::cout.precision(3); 
+            // std::cout << "[Not loop] Minimum Score: " << min_score << " between " << LOOP_BUFFER_FILTERED.back() << " and " << LOOP_BUFFER_FILTERED[index] << "." << std::endl;
+            return std::make_pair(-1,min_score);
+        }
+    }
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    // for (unsigned long i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
+    //     if (nn_idx == LOOP_BUFFER_GLOBAL[i]){
+
+    //         if(min_score < 0.35){
+    //             std::cout.precision(3); 
+    //             std::cout << "[Loop found] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
+                
+    //             return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
+    //         }
+    //         else{
+    //             std::cout.precision(3); 
+    //             std::cout << "[Not loop] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
+    //             return std::make_pair(-1,min_score);
+    //         }
+                
+    //     }
+    //     counter++;
+    // }
 
     // std::pair<int, float> result {nn_idx, min_score};
     // return result;
     return std::make_pair(-1,0.0);
 }
 
-void LOOPS_FROM_FILE::store_indexes(int SC_idx){
+void LOOPS_FROM_FILE::store_indexes(int idx, int ICP_idx){
 
     int gt_index_glob;
     int gt_index_loc;
-    // int contador = 0;
-
+    int contador = 0;
+    // std::cout << LOOP_BUFFER_FILTERED[idx] << '\n';
     // std::cout << "storing indexes" << std::endl;
     // std::cout <<  "TAMANHO DE GT: " << LOOPS_INDEX_GT.size() << std::endl;
 
-    SC_INDEX.push_back(SC_idx);
-    std::cout << "SC_INDEX: " << SC_idx << std::endl;
+    INDEX.push_back(idx);
+    
+    std::cout << "INDEX: " << idx << std::endl;
+    std::cout << "ICP_INDEX: " << ICP_idx << std::endl;
 
     if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX_GT[frame_id]) == false)
     {
@@ -233,40 +258,117 @@ void LOOPS_FROM_FILE::store_indexes(int SC_idx){
         return;
     }
     else{
-        gt_index_glob = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame_id);
+        // if(idx == -1){
+        //     GT_INDEX.push_back(-1);
+        //     std::cout << "GT_INDEX: " << "-1" << std::endl;
+        // }
+        // else{
+        //     GT_INDEX.push_back(LOOP_BUFFER_FILTERED[idx]);
+        //     std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[idx] << std::endl;
+        // }
+    
+        std::unordered_map<int, int> valueToIndex;
+
+        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); ++i) {
+            valueToIndex[LOOP_BUFFER_GLOBAL[i]] = i;
+        }
         
+        gt_index_glob = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame_id);
         std::cout << "GT_INDEX_GLOBAL: " << gt_index_glob << std::endl;
 
-        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
-            if (gt_index_glob == LOOP_BUFFER_GLOBAL[i]){
+        // Start the timer
+        auto start = std::chrono::high_resolution_clock::now();
 
-                GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
-                std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[i] << std::endl;
-                break;
-            }
-            // contador++;
+        auto it = valueToIndex.find(gt_index_glob);
+        if (it != valueToIndex.end()) {
+            int index = it->second;
+            // std::cout << " GT_INDEX: " << index << '\n';
+            std::cout << "ENTREI" << std::endl;
+            GT_INDEX.push_back(LOOP_BUFFER_FILTERED[index]);
+            std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[index] << std::endl;
+            // std::cout << "Valor " << gt_index_glob << " encontrado no índice: " << index << std::endl;
+        } else {
+            GT_INDEX.push_back(-1);
+            // std::cout << "GT_INDEX: " << "-1" << std::endl;
+            // std::cout << "Valor " << gt_index_glob << " não encontrado no vetor." << std::endl;
         }
+
+        // End the timer
+        auto end = std::chrono::high_resolution_clock::now();
+
+        // Calculate the duration
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+        std::cout << "Time taken by operation: " << duration.count() << " microseconds" << std::endl;
+
+
+        // for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
+        //     if (gt_index_glob == LOOP_BUFFER_GLOBAL[i]){
+
+        //         GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
+        //         std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[i] << std::endl;
+        //         break;
+        //     }
+        //     contador++;
+        // }
         return;
     }
 }
 
 void LOOPS_FROM_FILE::save_indexes(){
-        std::ofstream outputFile("/home/joaojorge/INDEXES.txt");
+        std::ofstream outputFile("/home/joaojorge/INDEXES.txt", std::ofstream::app);
 
-        // std::cout << "Tamanho do SC INDEX: " << loops_rede.SC_INDEX.size()
+        // std::cout << "Tamanho do SC INDEX: " << loops_rede.INDEX.size()
         if (outputFile.is_open()){
             // Write ground truth and scan context output indexes to the file
-            std::cout << "TAMANHO GT_INDEX: " << GT_INDEX.size() << std::endl;
-            for (int i = 0; i < GT_INDEX.size() && i < SC_INDEX.size(); ++i) {
-                outputFile << GT_INDEX[i] << " " << SC_INDEX[i] << '\n';
-            }
+            // std::cout << "TAMANHO GT_INDEX: " << GT_INDEX.size() << std::endl;
+            // std::cout << "TAMANHO DE ICP_INDEX:" << ICP_INDEX.size() << std::endl;
 
-            // Close the file after writing
-            outputFile.flush();
+            // for (int i = 0; i < GT_INDEX.size() && i < INDEX.size(); ++i) {
+            //     outputFile << GT_INDEX[i] << " " << INDEX[i] << '\n';
+            // }
+
+            // Grava o último valor dos vectores INDEX e GT_INDEX
+            if (!GT_INDEX.empty() || !ICP_INDEX.empty()) {
+                outputFile << INDEX.back() << " " << ICP_INDEX.back() << " " << GT_INDEX.back() << '\n';
+                // << " " << ICP_INDEX.back()
+            } else {
+                outputFile << "GT_INDEX está vazio.\n";
+
             outputFile.close();
             std::cout << "Data written to the file successfully." << std::endl;
-        } 
-        else {
+            } 
+        }
+        else{
+            std::cout << "Error opening the file." << std::endl;
+        }
+        
+    return;
+}
+
+void LOOPS_FROM_FILE::save_ICP_INDEX(){
+        std::ofstream outputFile("/home/joaojorge/INDEXES_SC_ICP.txt", std::ofstream::app);
+
+        // std::cout << "Tamanho do SC INDEX: " << loops_rede.INDEX.size()
+        if (outputFile.is_open()){
+            // Write ground truth and scan context output indexes to the file
+            std::cout << "TAMANHO ICP_INDEX: " << ICP_INDEX.size() << std::endl;
+            // for (int i = 0; i < GT_INDEX.size() && i < INDEX.size(); ++i) {
+            //     outputFile << GT_INDEX[i] << " " << INDEX[i] << '\n';
+            // }
+
+            // Grava o último valor dos vectores INDEX e GT_INDEX
+            if (!ICP_INDEX.empty()) {
+                outputFile << ICP_INDEX.back() << '\n';
+                // << " " << ICP_INDEX.back()
+            } else {
+                outputFile << "ICP_INDEX está vazio.\n";
+
+            outputFile.close();
+            std::cout << "Data written to the file successfully." << std::endl;
+            } 
+        }
+        else{
             std::cout << "Error opening the file." << std::endl;
         }
         
