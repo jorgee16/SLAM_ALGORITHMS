@@ -48,8 +48,8 @@ int main(int argc, char **argv)
     
     // write_to_file(ofs);
     if(ofs.good()){
-        remove("/home/joaojorge/POLO2_SEQ1_SC_LL.txt");
-        ofs.open("/home/joaojorge/POLO2_SEQ1_SC_LL.txt", std::ofstream::app);
+        remove("/home/joaojorge/KITTI_SEQ05_SC_LL.txt");
+        ofs.open("/home/joaojorge/KITTI_SEQ05_SC_LL.txt", std::ofstream::app);
     }
     ros::spin();
 

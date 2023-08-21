@@ -169,7 +169,7 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
      * step 1: candidates from ringkey tree_
      */
     
-    std::cout << "FRAME ID: " << frame_id << std::endl;
+    // std::cout << "FRAME ID: " << frame_id << std::endl;
 
     if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX[frame_id]) == false)
     {
@@ -186,51 +186,51 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
 
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%   testar outra maneira mais eficiente de procurar o frame no buffer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    std::unordered_map<int, int> valueToIndex;
+    // std::unordered_map<int, int> valueToIndex;
     
-    for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); ++i) {
-        valueToIndex[LOOP_BUFFER_GLOBAL[i]] = i;
-    }
+    // for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); ++i) {
+    //     valueToIndex[LOOP_BUFFER_GLOBAL[i]] = i;
+    // }
 
-    auto it = valueToIndex.find(nn_idx);
-    if (it != valueToIndex.end()) {
-        int index;
-        index = it->second;
-        std::cout << "REDE_INDEX: " << index << '\n';
-        if(min_score < 0.5){
+    // auto it = valueToIndex.find(nn_idx);
+    // if (it != valueToIndex.end()) {
+    //     int index;
+    //     index = it->second;
+    //     // std::cout << "REDE_INDEX: " << index << '\n';
+    //     if(min_score < 0.35){
         
-            std::cout.precision(3); 
-            // std::cout << "[Loop found] Minimum Score: " << min_score << " between " << LOOP_BUFFER_FILTERED.back() << " and " << LOOP_BUFFER_FILTERED[index] << "." << std::endl;
+    //         std::cout.precision(3); 
+    //         // std::cout << "[Loop found] Minimum Score: " << min_score << " between " << LOOP_BUFFER_FILTERED.back() << " and " << LOOP_BUFFER_FILTERED[index] << "." << std::endl;
             
-            return std::make_pair(LOOP_BUFFER_FILTERED[index],min_score);
-        }
-        else{
-            std::cout.precision(3); 
-            // std::cout << "[Not loop] Minimum Score: " << min_score << " between " << LOOP_BUFFER_FILTERED.back() << " and " << LOOP_BUFFER_FILTERED[index] << "." << std::endl;
-            return std::make_pair(-1,min_score);
-        }
-    }
+    //         return std::make_pair(LOOP_BUFFER_FILTERED[index],min_score);
+    //     }
+    //     else{
+    //         std::cout.precision(3); 
+    //         // std::cout << "[Not loop] Minimum Score: " << min_score << " between " << LOOP_BUFFER_FILTERED.back() << " and " << LOOP_BUFFER_FILTERED[index] << "." << std::endl;
+    //         return std::make_pair(-1,min_score);
+    //     }
+    // }
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-    // for (unsigned long i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
-    //     if (nn_idx == LOOP_BUFFER_GLOBAL[i]){
+    for (unsigned long i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
+        if (nn_idx == LOOP_BUFFER_GLOBAL[i]){
 
-    //         if(min_score < 0.35){
-    //             std::cout.precision(3); 
-    //             std::cout << "[Loop found] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
+            if(min_score < 0.35){
+                std::cout.precision(3); 
+                std::cout << "[Loop found] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
                 
-    //             return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
-    //         }
-    //         else{
-    //             std::cout.precision(3); 
-    //             std::cout << "[Not loop] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
-    //             return std::make_pair(-1,min_score);
-    //         }
+                return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
+            }
+            else{
+                std::cout.precision(3); 
+                std::cout << "[Not loop] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
+                return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
+            }
                 
-    //     }
-    //     counter++;
-    // }
+        }
+        counter++;
+    }
 
     // std::pair<int, float> result {nn_idx, min_score};
     // return result;
@@ -258,59 +258,40 @@ void LOOPS_FROM_FILE::store_indexes(int idx, int ICP_idx){
         return;
     }
     else{
-        // if(idx == -1){
-        //     GT_INDEX.push_back(-1);
-        //     std::cout << "GT_INDEX: " << "-1" << std::endl;
-        // }
-        // else{
-        //     GT_INDEX.push_back(LOOP_BUFFER_FILTERED[idx]);
-        //     std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[idx] << std::endl;
-        // }
-    
-        std::unordered_map<int, int> valueToIndex;
+        // std::unordered_map<int, int> valueToIndex;
 
-        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); ++i) {
-            valueToIndex[LOOP_BUFFER_GLOBAL[i]] = i;
-        }
+        // for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); ++i) {
+        //     valueToIndex[LOOP_BUFFER_GLOBAL[i]] = i;
+        // }
         
         gt_index_glob = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame_id);
-        std::cout << "GT_INDEX_GLOBAL: " << gt_index_glob << std::endl;
+        // std::cout << "GT_INDEX_GLOBAL: " << gt_index_glob << std::endl;
 
         // Start the timer
-        auto start = std::chrono::high_resolution_clock::now();
+        // auto start = std::chrono::high_resolution_clock::now();
 
-        auto it = valueToIndex.find(gt_index_glob);
-        if (it != valueToIndex.end()) {
-            int index = it->second;
-            // std::cout << " GT_INDEX: " << index << '\n';
-            std::cout << "ENTREI" << std::endl;
-            GT_INDEX.push_back(LOOP_BUFFER_FILTERED[index]);
-            std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[index] << std::endl;
-            // std::cout << "Valor " << gt_index_glob << " encontrado no índice: " << index << std::endl;
-        } else {
-            GT_INDEX.push_back(-1);
-            // std::cout << "GT_INDEX: " << "-1" << std::endl;
-            // std::cout << "Valor " << gt_index_glob << " não encontrado no vetor." << std::endl;
-        }
+        // auto it = valueToIndex.find(gt_index_glob);
+        // if (it != valueToIndex.end()) {
+        //     int index = it->second;
 
-        // End the timer
-        auto end = std::chrono::high_resolution_clock::now();
+        //     GT_INDEX.push_back(LOOP_BUFFER_FILTERED[index-1]);
+        //     std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[index-1] << std::endl;
 
-        // Calculate the duration
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        // } else {
+        //     GT_INDEX.push_back(-1);
 
-        std::cout << "Time taken by operation: " << duration.count() << " microseconds" << std::endl;
-
-
-        // for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
-        //     if (gt_index_glob == LOOP_BUFFER_GLOBAL[i]){
-
-        //         GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
-        //         std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[i] << std::endl;
-        //         break;
-        //     }
-        //     contador++;
         // }
+
+        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
+            if (gt_index_glob == LOOP_BUFFER_GLOBAL[i]){
+
+                GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
+                std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[contador] << std::endl;
+                return;
+            }
+            contador++;
+        }
+        GT_INDEX.push_back(-1);
         return;
     }
 }
