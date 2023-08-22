@@ -236,6 +236,8 @@ private:
 
     // REDE TIAGO
     float min_score;
+    float min_dist;
+    double min_SC_dist;
     // int nn_index;
     std::string method;
     int algorithm;
@@ -724,10 +726,8 @@ public:
         laserCloudRaw->clear();
         pcl::fromROSMsg(*msg, *laserCloudRaw);
         // REDE TIAGO
-        loops_rede.makeAndSaveScancontextAndKeys(*laserCloudRaw);
-        // if(method == "ficheiro" || method == "fusion"){
-        //     loops_rede.makeAndSaveScancontextAndKeys(*laserCloudRaw);
-        // }
+        // loops_rede.makeAndSaveScancontextAndKeys(*laserCloudRaw);
+        loops_rede.frame_id++;
     }
 
     void laserCloudCornerLastHandler(const sensor_msgs::PointCloud2ConstPtr& msg){
@@ -927,38 +927,39 @@ public:
 
         // ros::Rate delay(1); 
         // delay.sleep();
+        if(GT_flag == false){
+            const std::string kitti_format_pg_filename {"/tmp/optimized_poses.txt"};
+            saveOptimizedVerticesKITTIformat(isamCurrentEstimate, kitti_format_pg_filename);
+            std::cout << "SAVING optimized poses" << endl;
+            // save final point cloud
+            pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
+            // pcl::io::savePCDFileASCII("/home/joaojorge/Documents/finalCloud.pcd",*globalMapKeyFramesDS);
 
-        const std::string kitti_format_pg_filename {"/tmp/optimized_poses.txt"};
-        saveOptimizedVerticesKITTIformat(isamCurrentEstimate, kitti_format_pg_filename);
-        std::cout << "SAVING optimized poses" << endl;
-        // save final point cloud
-        pcl::io::savePCDFileASCII(fileDirectory+"finalCloud.pcd", *globalMapKeyFramesDS);
-        // pcl::io::savePCDFileASCII("/home/joaojorge/Documents/finalCloud.pcd",*globalMapKeyFramesDS);
+            std::cout << "SAVING PCDS" << endl;
+            string cornerMapString = "/home/joaojorge/Documents/cornerMap.pcd";
+            string surfaceMapString = "/home/joaojorge/Documents/surfaceMap.pcd";
+            string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
 
-        std::cout << "SAVING PCDS" << endl;
-        string cornerMapString = "/home/joaojorge/Documents/cornerMap.pcd";
-        string surfaceMapString = "/home/joaojorge/Documents/surfaceMap.pcd";
-        string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
+            pcl::PointCloud<PointType>::Ptr cornerMapCloud(new pcl::PointCloud<PointType>());
+            pcl::PointCloud<PointType>::Ptr cornerMapCloudDS(new pcl::PointCloud<PointType>());
+            pcl::PointCloud<PointType>::Ptr surfaceMapCloud(new pcl::PointCloud<PointType>());
+            pcl::PointCloud<PointType>::Ptr surfaceMapCloudDS(new pcl::PointCloud<PointType>());
+            
+            for(int i = 0; i < cornerCloudKeyFrames.size(); i++) {
+                *cornerMapCloud  += *transformPointCloud(cornerCloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
+                *surfaceMapCloud += *transformPointCloud(surfCloudKeyFrames[i],     &cloudKeyPoses6D->points[i]);
+                *surfaceMapCloud += *transformPointCloud(outlierCloudKeyFrames[i],  &cloudKeyPoses6D->points[i]);
+            }
 
-        pcl::PointCloud<PointType>::Ptr cornerMapCloud(new pcl::PointCloud<PointType>());
-        pcl::PointCloud<PointType>::Ptr cornerMapCloudDS(new pcl::PointCloud<PointType>());
-        pcl::PointCloud<PointType>::Ptr surfaceMapCloud(new pcl::PointCloud<PointType>());
-        pcl::PointCloud<PointType>::Ptr surfaceMapCloudDS(new pcl::PointCloud<PointType>());
-        
-        for(int i = 0; i < cornerCloudKeyFrames.size(); i++) {
-            *cornerMapCloud  += *transformPointCloud(cornerCloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
-    	    *surfaceMapCloud += *transformPointCloud(surfCloudKeyFrames[i],     &cloudKeyPoses6D->points[i]);
-    	    *surfaceMapCloud += *transformPointCloud(outlierCloudKeyFrames[i],  &cloudKeyPoses6D->points[i]);
+            downSizeFilterCorner.setInputCloud(cornerMapCloud);
+            downSizeFilterCorner.filter(*cornerMapCloudDS);
+            downSizeFilterSurf.setInputCloud(surfaceMapCloud);
+            downSizeFilterSurf.filter(*surfaceMapCloudDS);
+
+            pcl::io::savePCDFileASCII(fileDirectory+"cornerMap.pcd", *cornerMapCloudDS);
+            pcl::io::savePCDFileASCII(fileDirectory+"surfaceMap.pcd", *surfaceMapCloudDS);
+            pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
         }
-
-        downSizeFilterCorner.setInputCloud(cornerMapCloud);
-        downSizeFilterCorner.filter(*cornerMapCloudDS);
-        downSizeFilterSurf.setInputCloud(surfaceMapCloud);
-        downSizeFilterSurf.filter(*surfaceMapCloudDS);
-
-        pcl::io::savePCDFileASCII(fileDirectory+"cornerMap.pcd", *cornerMapCloudDS);
-        pcl::io::savePCDFileASCII(fileDirectory+"surfaceMap.pcd", *surfaceMapCloudDS);
-        pcl::io::savePCDFileASCII(fileDirectory+"trajectory.pcd", *cloudKeyPoses3D);
         // save_indexes();
 
     }
@@ -1056,9 +1057,17 @@ public:
         
         RSclosestHistoryFrameID = -1;
         int curMinID = 1000000;
+        min_dist = 100000.0;
+
+        // float dt = pointSearchSqDisLoop[1];  // keyframe distance mais proximo da current pose
+        
         // policy: take Oldest one (to fix error of the whole trajectory)
         for (int i = 0; i < pointSearchIndLoop.size(); ++i){
             int id = pointSearchIndLoop[i];
+            
+            // float dt = pointSearchSqDisLoop[i];
+            // std::cout << "DT: " << dt << std::endl;
+
             if (abs(cloudKeyPoses6D->points[id].time - timeLaserOdometry) > 30.0){
                 // RSclosestHistoryFrameID = id;
                 // break;
@@ -1066,8 +1075,15 @@ public:
                     curMinID = id;
                     RSclosestHistoryFrameID = curMinID;
                 }
+                float dt = pointSearchSqDisLoop[1];
+                min_dist = dt;
             }
+            // else{
+            //     min_dist = -1;
+            // }
         }
+        
+        std::cout << "Min dist: " << min_dist << std::endl;
 
         if (RSclosestHistoryFrameID == -1){
             // Do nothing here
@@ -1121,8 +1137,10 @@ public:
             
             // std::cout << "latestFrameIDLoopCloure: " << latestFrameIDLoopCloure << endl;
             auto detectResult = scManager.detectLoopClosureID(); // first: nn index, second: yaw diff 
-            SCclosestHistoryFrameID = detectResult.first;
-            yawDiffRad = detectResult.second; // not use for v1 (because pcl icp withi initial somthing wrong...)
+            SCclosestHistoryFrameID = detectResult.first.first;
+            yawDiffRad = detectResult.first.second; // not use for v1 (because pcl icp withi initial somthing wrong...)
+            min_SC_dist = detectResult.second;
+
             std::cout << "SCclosestHistoryFrameID: " << SCclosestHistoryFrameID << std::endl;
             
             
@@ -1175,7 +1193,7 @@ public:
             // std::cout << "Number of PCD's received: " << loops_rede.frame_id << endl;
             // std::cout << std::endl;
 
-            std::cout << "GLOBAL Buffer size: " << loops_rede.LOOP_BUFFER_GLOBAL.size() << std::endl;
+            // std::cout << "GLOBAL Buffer size: " << loops_rede.LOOP_BUFFER_GLOBAL.size() << std::endl;
             // std::cout << "FILTERED Buffer size: " << loops_rede.LOOP_BUFFER_FILTERED.size() << std::endl;
 
             // cout << "SCclosestHistoryFrameID: " << SCclosestHistoryFrameID << endl;
@@ -1186,8 +1204,10 @@ public:
             
             // *********************  FUSAO SC E REDE  ***************************
             auto detectResult = scManager.detectLoopClosureID(); 
-            SCclosestHistoryFrameID = detectResult.first;
-            yawDiffRad = detectResult.second;
+            SCclosestHistoryFrameID = detectResult.first.first;
+            yawDiffRad = detectResult.first.second;
+            min_SC_dist = detectResult.second;
+
             std::cout << "SCclosestHistoryFrameID: " << SCclosestHistoryFrameID << std::endl;
 
             if((loops_rede.frame_id) >= loops_rede.LOOPS_INDEX.size()){
@@ -1232,7 +1252,7 @@ public:
                     loops_rede.ICP_INDEX.push_back(-1);
 
                     loops_rede.store_indexes(SCclosestHistoryFrameID, SC_ICP_idx);
-                    loops_rede.save_indexes();
+                    loops_rede.save_indexes(min_dist,min_SC_dist);
                 }
                 return false;
             }
@@ -1270,7 +1290,7 @@ public:
                     loops_rede.ICP_INDEX.push_back(-1);
 
                     loops_rede.store_indexes(RedeclosestHistoryFrameID, REDE_ICP_idx);
-                    loops_rede.save_indexes();
+                    loops_rede.save_indexes(min_dist,min_score);
                 }
                 return false;
             }
@@ -1310,7 +1330,7 @@ public:
                     loops_rede.ICP_INDEX.push_back(-1);
 
                     loops_rede.store_indexes(RedeclosestHistoryFrameID, ICP_idx);
-                    loops_rede.save_indexes();
+                    loops_rede.save_indexes(min_dist,min_SC_dist);
                 }
                 return false;
             }
@@ -1568,7 +1588,7 @@ public:
                         int SC_ICP_idx = -1;
 
                         loops_rede.store_indexes(SCclosestHistoryFrameID, SC_ICP_idx);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_SC_dist);
                     }
                     isValidSCloopFactor = false;
                 }
@@ -1577,7 +1597,7 @@ public:
                         loops_rede.ICP_INDEX.push_back(SCclosestHistoryFrameID);
 
                         loops_rede.store_indexes(SCclosestHistoryFrameID, SCclosestHistoryFrameID);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_SC_dist);
                     }
                     std::cout << "[SC] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and SC nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
                     isValidSCloopFactor = true;
@@ -1628,7 +1648,7 @@ public:
                         int REDE_ICP_idx = -1;
 
                         loops_rede.store_indexes(RedeclosestHistoryFrameID, REDE_ICP_idx);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_score);
                     }
                     std::cout << "[REDE] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
                     isValidRedeloopFactor = false;
@@ -1639,7 +1659,7 @@ public:
                         loops_rede.ICP_INDEX.push_back(RedeclosestHistoryFrameID);
 
                         loops_rede.store_indexes(RedeclosestHistoryFrameID, RedeclosestHistoryFrameID);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_score);
 
                     }
                     std::cout << "[REDE] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and REDE nearest [ " << RedeclosestHistoryFrameID << " ]" << std::endl;
@@ -1693,7 +1713,7 @@ public:
                         int ICP_idx = -1;
 
                         loops_rede.store_indexes(RedeclosestHistoryFrameID, ICP_idx);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_score);
                     }
                     std::cout << "[FUSION] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
                     isValidRedeloopFactor = false;
@@ -1704,7 +1724,7 @@ public:
                         loops_rede.ICP_INDEX.push_back(RedeclosestHistoryFrameID);
 
                         loops_rede.store_indexes(RedeclosestHistoryFrameID, RedeclosestHistoryFrameID);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_score);
 
                     }
                     std::cout << "[FUSION] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and Rede nearest [ " << RedeclosestHistoryFrameID << " ]" << std::endl;
@@ -1750,7 +1770,7 @@ public:
                         int ICP_idx = -1;
 
                         loops_rede.store_indexes(SCclosestHistoryFrameID, ICP_idx);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_SC_dist);
                     }
                     std::cout << "[FUSION] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
                     isValidSCloopFactor = false;
@@ -1760,7 +1780,7 @@ public:
                         loops_rede.ICP_INDEX.push_back(SCclosestHistoryFrameID);
 
                         loops_rede.store_indexes(SCclosestHistoryFrameID, SCclosestHistoryFrameID);
-                        loops_rede.save_indexes();
+                        loops_rede.save_indexes(min_dist,min_SC_dist);
                     }
                     std::cout << "[FUSION] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and SC nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
                     isValidSCloopFactor = true;
@@ -1807,7 +1827,7 @@ public:
                             int ICP_idx = -1;
 
                             loops_rede.store_indexes(SCclosestHistoryFrameID, ICP_idx);
-                            loops_rede.save_indexes();
+                            loops_rede.save_indexes(min_dist,min_SC_dist);
                         }
                         std::cout << "[FUSION] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
                         isValidSCloopFactor = false;
@@ -1817,7 +1837,7 @@ public:
                             loops_rede.ICP_INDEX.push_back(SCclosestHistoryFrameID);
 
                             loops_rede.store_indexes(SCclosestHistoryFrameID, SCclosestHistoryFrameID);
-                            loops_rede.save_indexes();
+                            loops_rede.save_indexes(min_dist,min_SC_dist);
                         }
                         std::cout << "[FUSION] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and SC/REDE nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
                         isValidSCloopFactor = true;
@@ -1882,7 +1902,7 @@ public:
                                 int ICP_idx = -1;
 
                                 loops_rede.store_indexes(SCclosestHistoryFrameID, ICP_idx);
-                                loops_rede.save_indexes();
+                                loops_rede.save_indexes(min_dist,min_SC_dist);
                             }
                             std::cout << "[FUSION] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
                             isValidSCloopFactor = false;
@@ -1892,7 +1912,7 @@ public:
                                 loops_rede.ICP_INDEX.push_back(SCclosestHistoryFrameID);
 
                                 loops_rede.store_indexes(SCclosestHistoryFrameID, SCclosestHistoryFrameID);
-                                loops_rede.save_indexes();
+                                loops_rede.save_indexes(min_dist,min_SC_dist);
                             }
                             std::cout << "[FUSION] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and SC nearest [ " << SCclosestHistoryFrameID << " ]" << std::endl;
                             isValidSCloopFactor = true;
@@ -1906,7 +1926,7 @@ public:
                                 int ICP_idx = -1;
 
                                 loops_rede.store_indexes(RedeclosestHistoryFrameID, ICP_idx);
-                                loops_rede.save_indexes();
+                                loops_rede.save_indexes(min_dist,min_score);
                             }
                             std::cout << "[FUSION] Reject this loop (bad icp fit score, > " << historyKeyframeFitnessScore << ")" << std::endl;
                             isValidRedeloopFactor = false;
@@ -1915,7 +1935,7 @@ public:
                             if(GT_flag == true){
                                 loops_rede.ICP_INDEX.push_back(RedeclosestHistoryFrameID);
                                 loops_rede.store_indexes(RedeclosestHistoryFrameID, RedeclosestHistoryFrameID);
-                                loops_rede.save_indexes();
+                                loops_rede.save_indexes(min_dist,min_score);
                             }
                             std::cout << "[FUSION] The detected loop factor is added between Current [ " << latestFrameIDLoopCloure << " ] and Rede nearest [ " << RedeclosestHistoryFrameID << " ]" << std::endl;
                             isValidRedeloopFactor = true;
@@ -2393,11 +2413,11 @@ public:
         currentRobotPosPoint.z = transformAftMapped[5];
 
         bool saveThisKeyFrame = true;
-        if (sqrt((previousRobotPosPoint.x-currentRobotPosPoint.x)*(previousRobotPosPoint.x-currentRobotPosPoint.x)
-                +(previousRobotPosPoint.y-currentRobotPosPoint.y)*(previousRobotPosPoint.y-currentRobotPosPoint.y)
-                +(previousRobotPosPoint.z-currentRobotPosPoint.z)*(previousRobotPosPoint.z-currentRobotPosPoint.z)) < 0.01){ // save keyframe every 0.3 meter 
-            saveThisKeyFrame = false;
-        }
+        // if (sqrt((previousRobotPosPoint.x-currentRobotPosPoint.x)*(previousRobotPosPoint.x-currentRobotPosPoint.x)
+        //         +(previousRobotPosPoint.y-currentRobotPosPoint.y)*(previousRobotPosPoint.y-currentRobotPosPoint.y)
+        //         +(previousRobotPosPoint.z-currentRobotPosPoint.z)*(previousRobotPosPoint.z-currentRobotPosPoint.z)) < 0.01){ // save keyframe every 0.3 meter 
+        //     saveThisKeyFrame = false;
+        // }
         if (saveThisKeyFrame == false && !cloudKeyPoses3D->points.empty())
         	return;
 

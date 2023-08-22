@@ -38,7 +38,7 @@ using std::atan2;
 using std::cos;
 using std::sin;
 
-using SCPointType = pcl::PointXYZI; // using xyz only. but a user can exchange the original bin encoding function (i.e., max hegiht) to max intensity (for detail, refer 20 ICRA Intensity Scan Context)
+using SCPointType = pcl::PointXYZI; // using xyz only. but a user can exchange the original bin encoding function (i.e., max height) to max intensity (for detail, refer 20 ICRA Intensity Scan Context)
 using KeyMat = std::vector<std::vector<float> >;
 using InvKeyTree = KDTreeVectorOfVectorsAdaptor< KeyMat, float >;
 
@@ -70,7 +70,7 @@ public:
 
     // User-side API
     void makeAndSaveScancontextAndKeys( pcl::PointCloud<SCPointType> & _scan_down );
-    std::pair<int, float> detectLoopClosureID( void ); // int: nearest node index, float: relative yaw  
+    std::pair<std::pair<int, float>, double> detectLoopClosureID( void ); // int: nearest node index, float: relative yaw  
 
 public:
     // hyper parameters ()

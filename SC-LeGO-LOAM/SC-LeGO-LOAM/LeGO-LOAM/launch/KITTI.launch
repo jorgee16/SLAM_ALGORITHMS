@@ -19,7 +19,7 @@
 
     <!---         PARAMETERS               -->
 
-    <param name="method" type="str" value="fusion" />
+    <param name="method" type="str" value="SC" />
 
 
     <!--           METHODS               -->
@@ -30,10 +30,11 @@
                     fusion              
                                          --> 
     <param name="loopclosureFlag" type="bool" value="true"/>
-    <param name="GT_flag" type="bool" value="false"/>
+    <param name="GT_flag" type="bool" value="true"/>
     
-    <param name="file_prediction" type ="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/prediction.txt" />
-    <param name="file_score" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/similarity.txt" />
+    <!-- ALGORITMOS FICHEIROS VLAD,ORCHNET, ETC-->
+    <param name="file_prediction" type ="str" value="/home/joaojorge/Documents/relocalization/SEQ05/ORCHNET/prediction.txt" />
+    <param name="file_score" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/ORCHNET/similarity.txt" />
     <param name="ground_truth" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/targets.txt" /> 
 
     <!-- <param name="fusion" type="bool" value="false"/> -->

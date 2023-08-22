@@ -244,7 +244,7 @@ void SCManager::makeAndSaveScancontextAndKeys( pcl::PointCloud<SCPointType> & _s
 } // SCManager::makeAndSaveScancontextAndKeys
 
 
-std::pair<int, float> SCManager::detectLoopClosureID ( void )
+std::pair<std::pair<int, float>, double> SCManager::detectLoopClosureID ( void )
 {
     int loop_id { -1 }; // init with -1, -1 means no loop (== LeGO-LOAM's variable "closestHistoryFrameID")
 
@@ -257,7 +257,7 @@ std::pair<int, float> SCManager::detectLoopClosureID ( void )
     if( polarcontext_invkeys_mat_.size() < NUM_EXCLUDE_RECENT + 1)
     {
         std::pair<int, float> result {loop_id, 0.0};
-        return result; // Early return 
+        return std::make_pair(result,-1); // Early return 
     }
 
     // tree_ reconstruction (not mandatory to make everytime)
@@ -333,7 +333,7 @@ std::pair<int, float> SCManager::detectLoopClosureID ( void )
     float yaw_diff_rad = deg2rad(nn_align * PC_UNIT_SECTORANGLE);
     std::pair<int, float> result {loop_id, yaw_diff_rad};
 
-    return result;
+    return std::make_pair(result,min_dist);
 
 } // SCManager::detectLoopClosureID
 
