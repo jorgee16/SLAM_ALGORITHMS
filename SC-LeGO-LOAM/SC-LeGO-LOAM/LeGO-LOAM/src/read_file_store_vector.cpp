@@ -127,30 +127,32 @@ void LOOPS_FROM_FILE::read_GT(std::string filename){
 
 }
 
-int LOOPS_FROM_FILE::indexes (std::vector<std::vector<int>> index, int frame_id){
-    // std::vector<int> candidate_indexes;
-    
-    //             for (int j = 0; j < index[frame_id].size(); j++)
-    //             {
-    //                 candidate_indexes.push_back(index[frame_id][j]);
-    //             }
-    int candidate_idx;
-    candidate_idx = index[frame_id][0];
+std::vector<int> LOOPS_FROM_FILE::indexes (std::vector<std::vector<int>> index, int frame_id){
+    std::vector<int> candidate_indexes;
+    // index[frame_id].size()
+    // store the first 5 indexes
+    for (int j = 0; j < 5; j++)
+    {
+        candidate_indexes.push_back(index[frame_id][j]);
+    }
+    // int candidate_idx;
+    // candidate_idx = index[frame_id][0];
 
-    return candidate_idx;
+    return candidate_indexes;
 }
 
-float LOOPS_FROM_FILE::scores (std::vector<std::vector<float>> score, int frame_id){
-    // std::vector<float> candidate_scores;
-    
-    //             for (int j = 0; j < score[frame_id].size(); j++)
-    //             {
-    //                 candidate_scores.push_back(score[frame_id][j]);
-    //             }
-    float candidate_score;
-    candidate_score = score[frame_id][0];
+std::vector<float> LOOPS_FROM_FILE::scores (std::vector<std::vector<float>> score, int frame_id){
+    std::vector<float> candidate_scores;
+    // score[frame_id].size()
+    // store the first 5 scores em vez de todos 
+    for(int j = 0; j < 5; j++)  
+    {
+        candidate_scores.push_back(score[frame_id][j]);
+    }
+    // float candidate_score;
+    // candidate_score = score[frame_id][0];
 
-    return candidate_score;
+    return candidate_scores;
 }
 
 // void LOOPS_FROM_FILE::makeAndSaveScancontextAndKeys( pcl::PointCloud<pcl::PointXYZI> & _scan_down ){
@@ -161,8 +163,8 @@ float LOOPS_FROM_FILE::scores (std::vector<std::vector<float>> score, int frame_
 
 std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
 
-    float min_score;
-    int nn_idx;
+    std::vector <float> min_score;
+    std::vector <int> nn_idx;
     int loop_id { -1 }; 
 
     // std::cout << "FRAME ID: " << frame_id << std::endl;
@@ -170,7 +172,7 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
     if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX[frame_id]) == false)
     {
         min_score = LOOPS_FROM_FILE::scores(SIMILARITY_SCORE, frame_id);
-        return std::make_pair(-1,min_score);
+        return std::make_pair(-1,min_score[0]);
     }
 
     
@@ -178,35 +180,37 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
     nn_idx = LOOPS_FROM_FILE::indexes(LOOPS_INDEX,frame_id);
     min_score = LOOPS_FROM_FILE::scores(SIMILARITY_SCORE, frame_id);
 
-    int counter = 0;
+    // int counter = 0;
 
     for (unsigned long i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
-        if (nn_idx == LOOP_BUFFER_GLOBAL[i]){
+        for(int j= 0; j < nn_idx.size(); j++){ 
+            if (nn_idx[j] == LOOP_BUFFER_GLOBAL[i]){
 
-            if(min_score < 0.5){
-                std::cout.precision(3); 
-                std::cout << "[Loop found] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
-                
-                return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
+                if(min_score[j] < 0.5){
+                    std::cout.precision(3); 
+                    std::cout << "[Loop found] Minimum Score: " << min_score[j] << " between " << frame_id << " and " << nn_idx[j] << "." << std::endl;
+                    
+                    return std::make_pair(LOOP_BUFFER_FILTERED[i],min_score[j]);
+                }
+                else{
+                    std::cout.precision(3); 
+                    std::cout << "[Not loop] Minimum Score: " << min_score[j] << " between " << frame_id << " and " << nn_idx[j] << "." << std::endl;
+                    return std::make_pair(LOOP_BUFFER_FILTERED[i],min_score[j]);
+                }
+                    
             }
-            else{
-                std::cout.precision(3); 
-                std::cout << "[Not loop] Minimum Score: " << min_score << " between " << frame_id << " and " << nn_idx << "." << std::endl;
-                return std::make_pair(LOOP_BUFFER_FILTERED[counter],min_score);
-            }
-                
         }
-        counter++;
+        // counter++;
     }
 
     // std::pair<int, float> result {nn_idx, min_score};
     // return result;
-    return std::make_pair(-1,min_score);
+    return std::make_pair(-1,min_score[0]);
 }
 
 void LOOPS_FROM_FILE::store_indexes(int idx, int ICP_idx){
 
-    int gt_index_glob;
+    std::vector<int> gt_index_glob;
     int gt_index_loc;
     int contador = 0;
     // std::cout << LOOP_BUFFER_FILTERED[idx] << '\n';
@@ -229,14 +233,16 @@ void LOOPS_FROM_FILE::store_indexes(int idx, int ICP_idx){
         gt_index_glob = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame_id);
 
 
-        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){ 
-            if (gt_index_glob == LOOP_BUFFER_GLOBAL[i]){
+        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){
+            for(int j = 0; j < gt_index_glob.size(); j++){
+                if (gt_index_glob[j] == LOOP_BUFFER_GLOBAL[i]){
 
-                GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
-                std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[contador] << std::endl;
-                return;
+                    GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
+                    std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[i] << std::endl;
+                    return;
+                }
             }
-            contador++;
+            // contador++;
         }
         GT_INDEX.push_back(-1);
         return;

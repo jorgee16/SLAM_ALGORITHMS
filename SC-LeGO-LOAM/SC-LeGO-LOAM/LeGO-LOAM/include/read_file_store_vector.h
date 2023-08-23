@@ -36,8 +36,8 @@ class LOOPS_FROM_FILE
         void read_file(std::string filename1,std::string filename2);
         void read_GT(std::string filename);
 
-        int indexes(std::vector<std::vector<int>> index, int cur_frame_id);
-        float scores(std::vector<std::vector<float>> score, int cur_frame_id);
+        std::vector<int> indexes(std::vector<std::vector<int>> index, int cur_frame_id);
+        std::vector<float> scores(std::vector<std::vector<float>> score, int cur_frame_id);
         std::pair<int, float> detectLoopClosureID(); // int: nearest node index, float: relative yaw  
 
         void store_indexes(int idx, int ICP_idx);

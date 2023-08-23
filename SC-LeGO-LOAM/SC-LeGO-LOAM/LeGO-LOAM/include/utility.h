@@ -177,7 +177,7 @@ extern const int   surroundingKeyframeSearchNum = 50; // submap size (when loop 
 // history key frames (history submap for loop closure)
 extern const float historyKeyframeSearchRadius = 20.0; // 20.0 NOT used in Scan Context-based loop detector / default 7.0; key frame that is within n meters from current pose will be considerd for loop closure
 extern const int   historyKeyframeSearchNum = 25; //default 25      // 2n+1 number of history key frames will be fused into a submap for loop closure
-extern const float historyKeyframeFitnessScore = 0.4; // default 0.3; the smaller the better alignment //0.7  // 1.5
+extern const float historyKeyframeFitnessScore = 0.5; // default 0.3; the smaller the better alignment //0.7  // 1.5
 
 extern const float globalMapVisualizationSearchRadius = 1500.0; // key frames with in n meters will be visualized
 
