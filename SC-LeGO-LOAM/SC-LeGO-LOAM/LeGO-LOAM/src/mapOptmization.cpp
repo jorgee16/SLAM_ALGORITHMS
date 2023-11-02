@@ -273,7 +273,7 @@ public:
     	isam = new ISAM2(parameters);
 
         pubKeyPoses = nh.advertise<sensor_msgs::PointCloud2>("/key_pose_origin", 2);
-        pubLaserCloudSurround = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 2);
+        pubLaserCloudSurround = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 1);
         pubOdomAftMapped = nh.advertise<nav_msgs::Odometry> ("/aft_mapped_to_init", 5);
 
         subLaserCloudRaw = nh.subscribe<sensor_msgs::PointCloud2>(pointCloudTopic, 2, &mapOptimization::laserCloudRawHandler, this);
@@ -299,6 +299,7 @@ public:
 
         downSizeFilterGlobalMapKeyPoses.setLeafSize(1.0, 1.0, 1.0); // for global map visualization
         downSizeFilterGlobalMapKeyFrames.setLeafSize(0.4, 0.4, 0.4); // for global map visualization
+        // downSizeFilterGlobalMapKeyFrames.setLeafSize(0.2, 0.2, 0.2);
 
         odomAftMapped.header.frame_id = "camera_init";
         odomAftMapped.child_frame_id = "aft_mapped";
@@ -345,15 +346,19 @@ public:
         //         filename2 = "/home/joaojorge/Documents/relocalization/GEM/similarity.txt";
         //         break;
         // }
+
+        // LER DO FICHEIRO DO TIAGO 
+
         if(method == "ficheiro" || method == "fusion"){
             loops_rede.read_file(filename1,filename2);
-            if(GT_flag == true)
-                loops_rede.read_GT(filename3);
         }
-        else{
-            if(GT_flag == true)
-                loops_rede.read_GT(filename3);
-        }
+        //     if(GT_flag == true)
+        //         loops_rede.read_GT(filename3);
+        // }
+        // else{
+        //     if(GT_flag == true && (method == "ficheiro" || method == "fusion")) 
+        //         loops_rede.read_GT(filename3);
+        // }
             
 
     }
@@ -919,7 +924,7 @@ public:
     // }
 
     void visualizeGlobalMapThread(){
-        ros::Rate rate(0.2);
+        ros::Rate rate(5); // 0.2
         while (ros::ok()){
             rate.sleep();
             publishGlobalMap();

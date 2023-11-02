@@ -11,7 +11,7 @@
     <param name="GT_flag" type="bool" value="false"/>
 
     <!--- rosbag play -->
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 2 $(arg bag)" required="true">
         <!-- IMU -->
         <!-- <remap from="/imu/data" to="/imu/data" /> -->
         <remap from="/ouster/points" to="/velodyne_points" />

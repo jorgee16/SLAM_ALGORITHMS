@@ -221,7 +221,7 @@ public:
             thisPoint.x = laserCloudIn->points[i].x;
             thisPoint.y = laserCloudIn->points[i].y;
             thisPoint.z = laserCloudIn->points[i].z;
-            // find the row and column index in the iamge for this point
+            // find the row and column index in the image for this point
             if (useCloudRing == true){
                 rowIdn = laserCloudInRing->points[i].ring;
             }

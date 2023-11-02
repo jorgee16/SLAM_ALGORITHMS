@@ -12,9 +12,9 @@
 
   <link name="chassi_link">
     <visual>
-      <origin rpy="0 ${PI/2} ${PI}" xyz="0 0 0"/>
+      <origin rpy="0 ${PI/2} ${PI}" xyz="0 0 -0.35"/>
       <geometry>
-         <mesh filename="package://carina_description/meshes/Ford_fusion.obj" scale="0.0098 0.0098 0.0098"/>
+         <mesh filename="package://carina_description/meshes/Ford_fusion.obj" scale="0.02 0.02 0.02"/>
       </geometry>
     </visual>
   </link>

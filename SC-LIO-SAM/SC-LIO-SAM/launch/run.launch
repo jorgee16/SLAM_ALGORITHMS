@@ -7,13 +7,15 @@
     <!-- <arg name='bag' value="/home/joaojorge/Downloads/kitti_2011_09_30_drive_0027_synced_no_TF.bag"/> -->
 
     <!-- Bag com IMU a 100 Hz SEQUENCIA 07 DO KITTI-->
-    <!-- <arg name="bag" value="/home/joaojorge/Downloads/kitti_2011_09_30_drive_0027_100_hz_IMU/kitti.bag"/> -->
+    <!-- <arg name="bag" value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0027_100_hz_IMU/kitti.bag"/> -->
+
+    <arg name='bag' value="/home/joaojorge/POLO2_SEQ2/POLO2_SEQ02_new.bag"/>
 
     <!-- Bag com IMU a 100 Hz SEQUENCIA 00 DO KITTI-->
     <!-- <arg name="bag" value="/home/joaojorge/Downloads/kitti_2011_10_03_drive_0027_100hz_IMU/kitti.bag"/> -->
 
     <!-- Bag com IMU a 100 Hz SEQUENCIA 05 DO KITTI-->
-    <arg name='bag' value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0018_100HZ_IMU/kitti.bag"/>
+    <!-- <arg name='bag' value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0018_100HZ_IMU/kitti.bag"/> -->
 
     <!-- *******************  SIM TIME *********************** -->
     <param name="/use_sim_time" value="true" />
@@ -25,8 +27,8 @@
 
     <!--- rosbag play -->
     <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
-        <remap from="/imu_raw" to="/imu_raw" />
-        <remap from="/points_raw" to="/points_raw" />
+        <remap from="/imu/data" to="/imu_raw" />
+        <remap from="/ouster/points" to="/points_raw" />
         <!-- <remap from="/tf" to="/tf_in" /> -->
     </node>
     <!--- LOAM -->
@@ -41,6 +43,6 @@
     <!--- Run Rviz-->
     <include file="$(find lio_sam)/launch/include/module_rviz.launch" />
 
-    <!-- <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/> -->
+    <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/>
 
 </launch>

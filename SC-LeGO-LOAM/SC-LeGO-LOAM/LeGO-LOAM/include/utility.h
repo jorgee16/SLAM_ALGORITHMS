@@ -136,7 +136,7 @@ extern const int Horizon_SCAN = 1024;
 extern const float ang_res_x = 360.0/float(Horizon_SCAN);
 extern const float ang_res_y = 33.2/float(N_SCAN-1);
 extern const float ang_bottom = 16.6+0.1;
-extern const int groundScanInd = 15;
+extern const int groundScanInd = 10;
 
 // HDL-64E 
 // extern const int N_SCAN = 64;
@@ -147,7 +147,7 @@ extern const int groundScanInd = 15;
 // extern const int groundScanInd = 20;
 
 extern const bool loopClosureEnableFlag = true;
-extern const double mappingProcessInterval = 0.1;
+extern const double mappingProcessInterval = 0.3;
 
 extern const float scanPeriod = 0.1;
 extern const int systemDelay = 0;
@@ -177,7 +177,7 @@ extern const int   surroundingKeyframeSearchNum = 50; // submap size (when loop 
 // history key frames (history submap for loop closure)
 extern const float historyKeyframeSearchRadius = 20.0; // 20.0 NOT used in Scan Context-based loop detector / default 7.0; key frame that is within n meters from current pose will be considerd for loop closure
 extern const int   historyKeyframeSearchNum = 25; //default 25      // 2n+1 number of history key frames will be fused into a submap for loop closure
-extern const float historyKeyframeFitnessScore = 0.5; // default 0.3; the smaller the better alignment //0.7  // 1.5
+extern const float historyKeyframeFitnessScore = 0.8; // default 0.3; the smaller the better alignment //0.7  // 1.5
 
 extern const float globalMapVisualizationSearchRadius = 1500.0; // key frames with in n meters will be visualized
 

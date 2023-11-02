@@ -195,7 +195,7 @@ std::pair<int, float> LOOPS_FROM_FILE::detectLoopClosureID(){
                 else{
                     std::cout.precision(3); 
                     std::cout << "[Not loop] Minimum Score: " << min_score[j] << " between " << frame_id << " and " << nn_idx[j] << "." << std::endl;
-                    return std::make_pair(LOOP_BUFFER_FILTERED[i],min_score[j]);
+                    return std::make_pair(-1,min_score[j]);
                 }
                     
             }
@@ -222,31 +222,31 @@ void LOOPS_FROM_FILE::store_indexes(int idx, int ICP_idx){
     std::cout << "INDEX: " << idx << std::endl;
     std::cout << "ICP_INDEX: " << ICP_idx << std::endl;
 
-    if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX_GT[frame_id]) == false)
-    {
-        GT_INDEX.push_back(-1);
-        std::cout << "GT_INDEX: " << "-1" << std::endl;
-        return;
-    }
-    else{
+    // if(LOOPS_FROM_FILE::has_loops(LOOPS_INDEX_GT[frame_id]) == false)
+    // {
+    //     GT_INDEX.push_back(-1);
+    //     std::cout << "GT_INDEX: " << "-1" << std::endl;
+    //     return;
+    // }
+    // else{
 
-        gt_index_glob = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame_id);
+    //     gt_index_glob = LOOPS_FROM_FILE::indexes(LOOPS_INDEX_GT, frame_id);
 
 
-        for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){
-            for(int j = 0; j < gt_index_glob.size(); j++){
-                if (gt_index_glob[j] == LOOP_BUFFER_GLOBAL[i]){
+    //     for (int i = 0; i < LOOP_BUFFER_GLOBAL.size(); i++){
+    //         for(int j = 0; j < gt_index_glob.size(); j++){
+    //             if (gt_index_glob[j] == LOOP_BUFFER_GLOBAL[i]){
 
-                    GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
-                    std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[i] << std::endl;
-                    return;
-                }
-            }
-            // contador++;
-        }
-        GT_INDEX.push_back(-1);
-        return;
-    }
+    //                 GT_INDEX.push_back(LOOP_BUFFER_FILTERED[i]);
+    //                 std::cout << "GT_INDEX: " << LOOP_BUFFER_FILTERED[i] << std::endl;
+    //                 return;
+    //             }
+    //         }
+    //         // contador++;
+    //     }
+    //     GT_INDEX.push_back(-1);
+    //     return;
+    // }
 }
 
 void LOOPS_FROM_FILE::save_indexes(float min_dist, double feature_dist){
