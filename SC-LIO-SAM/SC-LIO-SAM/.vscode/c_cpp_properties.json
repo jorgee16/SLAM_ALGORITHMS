@@ -6,11 +6,11 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "/home/joaojorge/LIO_ws/devel/include/**",
+        "/home/joaojorge/SLAM_ws/devel/include/**",
         "/home/joaojorge/catkin_ws/install_isolated/include/**",
         "/opt/ros/noetic/include/**",
-        "/home/joaojorge/LIO_ws/src/SC-LeGO-LOAM/SC-LeGO-LOAM/LeGO-LOAM/include/**",
-        "/home/joaojorge/LIO_ws/src/SC-LIO-SAM/SC-LIO-SAM/include/**",
+        "/home/joaojorge/SLAM_ws/src/SC-LeGO-LOAM/SC-LeGO-LOAM/LeGO-LOAM/include/**",
+        "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include/**",
         "/usr/include/**"
       ],
       "name": "ROS",
@@ -22,3 +22,4 @@
   ],
   "version": 4
 }
+

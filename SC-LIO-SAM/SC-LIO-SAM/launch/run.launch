@@ -26,7 +26,7 @@
     <rosparam file="$(find lio_sam)/config/params_liosam.yaml" command="load" />
 
     <!--- rosbag play -->
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 2 $(arg bag)" required="true">
         <remap from="/imu/data" to="/imu_raw" />
         <remap from="/ouster/points" to="/points_raw" />
         <!-- <remap from="/tf" to="/tf_in" /> -->
