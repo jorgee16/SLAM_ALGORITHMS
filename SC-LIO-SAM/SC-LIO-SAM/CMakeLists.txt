@@ -35,12 +35,6 @@ add_message_files(
   cloud_info.msg
 )
 
-add_message_files(
-  DIRECTORY msg
-  FILES
-  cloud_info.msg
-)
-
 generate_messages(
   DEPENDENCIES
   geometry_msgs

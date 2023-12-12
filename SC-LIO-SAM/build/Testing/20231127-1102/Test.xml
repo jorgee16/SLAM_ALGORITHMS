@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Site BuildName="(empty)"
-	BuildStamp="20231116-1437-Experimental"
+	BuildStamp="20231127-1102-Experimental"
 	Name="isrmeca"
 	Generator="ctest-3.16.3"
 	CompilerName="/usr/bin/g++"
 	CompilerVersion="9.4.0"
 	OSName="Linux"
 	Hostname="isrmeca"
-	OSRelease="5.15.0-88-generic"
-	OSVersion="#98~20.04.1-Ubuntu SMP Mon Oct 9 16:43:45 UTC 2023"
+	OSRelease="5.15.0-89-generic"
+	OSVersion="#99~20.04.1-Ubuntu SMP Thu Nov 2 15:16:47 UTC 2023"
 	OSPlatform="x86_64"
 	Is64Bits="1"
 	VendorString="AuthenticAMD"
@@ -21,14 +21,14 @@
 	TotalVirtualMemory="7628"
 	TotalPhysicalMemory="64220"
 	LogicalProcessorsPerPhysical="2"
-	ProcessorClockFrequency="2200"
+	ProcessorClockFrequency="2963.31"
 	>
 	<Testing>
-		<StartDateTime>Nov 16 16:36 WET</StartDateTime>
-		<StartTestTime>1700152600</StartTestTime>
+		<StartDateTime>Nov 27 11:02 WET</StartDateTime>
+		<StartTestTime>1701082963</StartTestTime>
 		<TestList/>
-		<EndDateTime>Nov 16 16:36 WET</EndDateTime>
-		<EndTestTime>1700152600</EndTestTime>
+		<EndDateTime>Nov 27 11:02 WET</EndDateTime>
+		<EndTestTime>1701082963</EndTestTime>
 		<ElapsedMinutes>0</ElapsedMinutes>
 	</Testing>
 </Site>

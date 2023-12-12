@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Site BuildName="(empty)"
-	BuildStamp="20231116-1437-Experimental"
+	BuildStamp="20231121-1038-Experimental"
 	Name="isrmeca"
 	Generator="ctest-3.16.3"
 	CompilerName="/usr/bin/g++"
@@ -24,11 +24,11 @@
 	ProcessorClockFrequency="2200"
 	>
 	<Testing>
-		<StartDateTime>Nov 16 16:36 WET</StartDateTime>
-		<StartTestTime>1700152600</StartTestTime>
+		<StartDateTime>Nov 21 10:38 WET</StartDateTime>
+		<StartTestTime>1700563102</StartTestTime>
 		<TestList/>
-		<EndDateTime>Nov 16 16:36 WET</EndDateTime>
-		<EndTestTime>1700152600</EndTestTime>
+		<EndDateTime>Nov 21 10:38 WET</EndDateTime>
+		<EndTestTime>1700563102</EndTestTime>
 		<ElapsedMinutes>0</ElapsedMinutes>
 	</Testing>
 </Site>
