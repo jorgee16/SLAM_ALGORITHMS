@@ -12,7 +12,7 @@ struct VelodynePointXYZIRT
 } EIGEN_ALIGN16;
 POINT_CLOUD_REGISTER_POINT_STRUCT (VelodynePointXYZIRT,
     (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-    (uint16_t, ring, ring) (float, time, time)
+    (std::uint16_t, ring, ring) (float, time, time)
 )
 
 struct OusterPointXYZIRT {
@@ -27,8 +27,8 @@ struct OusterPointXYZIRT {
 } EIGEN_ALIGN16;
 POINT_CLOUD_REGISTER_POINT_STRUCT(OusterPointXYZIRT,
     (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-    (uint32_t, t, t) (uint16_t, reflectivity, reflectivity)
-    (uint8_t, ring, ring) (uint16_t, noise, noise) (uint32_t, range, range)
+    (std::uint32_t, t, t) (std::uint16_t, reflectivity, reflectivity)
+    (std::uint8_t, ring, ring) (std::uint16_t, noise, noise) (std::uint32_t, range, range)
 )
 
 struct MulranPointXYZIRT { // from the file player's topic https://github.com/irapkaist/file_player_mulran, see https://github.com/irapkaist/file_player_mulran/blob/17da0cb6ef66b4971ec943ab8d234aa25da33e7e/src/ROSThread.cpp#L7
@@ -41,7 +41,7 @@ struct MulranPointXYZIRT { // from the file player's topic https://github.com/ir
  }EIGEN_ALIGN16;
  POINT_CLOUD_REGISTER_POINT_STRUCT (MulranPointXYZIRT,
      (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-     (uint32_t, t, t) (int, ring, ring)
+     (std::uint32_t, t, t) (int, ring, ring)
  )
 
 // Use the Velodyne point format as a common representation
