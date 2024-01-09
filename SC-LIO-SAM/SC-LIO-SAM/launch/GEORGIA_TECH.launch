@@ -10,10 +10,10 @@
     <!-- <arg name="bag" value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0027_100_hz_IMU/kitti.bag"/> -->
     
     <!-- Bag com IMU a 200HZ POLO 2 SEQUENCIA 2 -->
-    <arg name='bag' value="/home/joaojorge/POLO2_SEQ2/POLO2_SEQ02_new.bag"/>
+    <!-- <arg name='bag' value="/home/joaojorge/POLO2_SEQ2/POLO2_SEQ02_new.bag"/> -->
 
     <!-- GEORGIA TECH DATASET -->
-    <!-- <arg name='bag' value="/home/joaojorge/orchard_new.bag"/> -->
+    <arg name='bag' value="/home/joaojorge/orchard_new.bag"/>
 
     <!-- Bag com IMU a 100 Hz SEQUENCIA 00 DO KITTI-->
     <!-- <arg name="bag" value="/home/joaojorge/Downloads/kitti_2011_10_03_drive_0027_100hz_IMU/kitti.bag"/> -->
@@ -34,8 +34,10 @@
         <remap from="/ouster/points" to="/points_raw" /> -->
 
     <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
+        <!-- <remap from="/imu/data" to="/imu_raw" />
+        <remap from="/ouster/points" to="/points_raw" /> -->
         <remap from="/imu/data" to="/imu_raw" />
-        <remap from="/ouster/points" to="/points_raw" />
+        <remap from="/os_cloud_node/points" to="/points_raw" />
 
     </node>
 
@@ -44,7 +46,7 @@
     <include file="$(find lio_sam)/launch/include/module_loam.launch" />
 
     <!--- Robot State TF -->
-    <include file="$(find lio_sam)/launch/include/module_robot_state_publisher.launch" />
+    <include file="$(find lio_sam)/launch/include/GEORGIA_module_state_publisher.launch" />
 
     <!--- Run Navsat -->
     <!-- <include file="$(find lio_sam)/launch/include/module_navsat.launch" /> -->
