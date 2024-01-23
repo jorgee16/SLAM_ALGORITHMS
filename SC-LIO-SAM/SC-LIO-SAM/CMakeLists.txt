@@ -91,6 +91,7 @@ target_link_libraries(${PROJECT_NAME}_featureExtraction ${catkin_LIBRARIES} ${PC
 add_executable(${PROJECT_NAME}_mapOptmization 
   src/mapOptmization.cpp
   src/Scancontext.cpp
+  
 )
 add_dependencies(${PROJECT_NAME}_mapOptmization ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 target_compile_options(${PROJECT_NAME}_mapOptmization PRIVATE ${OpenMP_CXX_FLAGS})
@@ -103,3 +104,7 @@ target_link_libraries(${PROJECT_NAME}_imuPreintegration Boost::timer ${catkin_LI
 add_executable(save_path src/save_path.cpp)
 add_dependencies(save_path ${catkin_EXPORTED_TARGETS})
 target_link_libraries(save_path ${catkin_LIBRARIES})
+
+add_executable(Reg_ICP src/Reg_ICP.cpp)
+add_dependencies(Reg_ICP ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Reg_ICP ${catkin_LIBRARIES})

@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/home/joaojorge/SLAM_ws/devel/include/**",
+                "/home/joaojorge/catkin_ws/install_isolated/include/**",
+                "/opt/ros/noetic/include/**",
+                "/home/joaojorge/SLAM_ws/src/SC-LeGO-LOAM/SC-LeGO-LOAM/LeGO-LOAM/include/**",
+                "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}

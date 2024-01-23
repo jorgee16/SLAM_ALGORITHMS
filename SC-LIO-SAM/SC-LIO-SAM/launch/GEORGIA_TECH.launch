@@ -13,7 +13,7 @@
     <!-- <arg name='bag' value="/home/joaojorge/POLO2_SEQ2/POLO2_SEQ02_new.bag"/> -->
 
     <!-- GEORGIA TECH DATASET -->
-    <arg name='bag' value="/home/joaojorge/orchard_new.bag"/>
+    <arg name='bag' value="/home/joaojorge/orchard.bag"/>
 
     <!-- Bag com IMU a 100 Hz SEQUENCIA 00 DO KITTI-->
     <!-- <arg name="bag" value="/home/joaojorge/Downloads/kitti_2011_10_03_drive_0027_100hz_IMU/kitti.bag"/> -->
@@ -27,7 +27,7 @@
     <!-- <remap from="/kitti/velo/pointcloud" to="/points_raw" />
     <remap from="/kitti/oxts/imu" to="/imu_raw" /> -->
     <!-- Parameters -->
-    <rosparam file="$(find lio_sam)/config/params_liosam.yaml" command="load" />
+    <rosparam file="$(find lio_sam)/config/params_GEORGIA_TECH.yaml" command="load" />
 
     <!--- rosbag play -->
         <!-- <remap from="/imu/data" to="/imu_raw" />
@@ -38,15 +38,28 @@
         <remap from="/ouster/points" to="/points_raw" /> -->
         <remap from="/imu/data" to="/imu_raw" />
         <remap from="/os_cloud_node/points" to="/points_raw" />
+        <!-- <remap from="/tf" to="/tf_in" /> -->
 
     </node>
 
     
+    <!-- <node name="tf_remove_frames" pkg="cartographer_ros"
+        type="tf_remove_frames.py">
+        <remap from="tf_out" to="/tf" />
+        <rosparam param="remove_frames">
+            - sbg
+        </rosparam>
+    </node> -->
+
     <!--- LOAM -->
     <include file="$(find lio_sam)/launch/include/module_loam.launch" />
 
     <!--- Robot State TF -->
-    <include file="$(find lio_sam)/launch/include/GEORGIA_module_state_publisher.launch" />
+    <!-- <include file="$(find lio_sam)/launch/include/GEORGIA_module_state_publisher.launch" /> -->
+
+        <!--- TF -->
+    <node pkg="tf" type="static_transform_publisher" name="sbg_to_base_link"  args="0 0 0 0 0 0 /base_link    /sbg 10" />
+    <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 -1.570795 -1.570795 0        /camera /base_link   10" /> -->
 
     <!--- Run Navsat -->
     <!-- <include file="$(find lio_sam)/launch/include/module_navsat.launch" /> -->

@@ -572,7 +572,10 @@ public:
                 continue;
 
             int rowIdn = laserCloudIn->points[i].ring;
+            
             // int rowIdn = (i % 64) + 1 ; // for MulRan dataset, Ouster OS1-64 .bin file,  giseop 
+
+            cout << "Rowidn: " << rowIdn << endl;
 
             if (rowIdn < 0 || rowIdn >= N_SCAN)
                 continue;

@@ -11,7 +11,9 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <tf/transform_datatypes.h>
+#include <Eigen/Geometry>
 
+#include <eigen_conversions/eigen_msg.h>
 #include <rosbag/view.h>
 #include <rosbag/message_instance.h>
 #include <tf2_eigen/tf2_eigen.h>
@@ -32,8 +34,8 @@ struct OusterPointXYZIRT {
 } EIGEN_ALIGN16;
 POINT_CLOUD_REGISTER_POINT_STRUCT(OusterPointXYZIRT,
     (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-    (uint32_t, t, t) (uint16_t, reflectivity, reflectivity)
-    (uint8_t, ring, ring) (uint16_t, noise, noise) (uint32_t, range, range)
+    (std::uint32_t, t, t) (std::uint16_t, reflectivity, reflectivity)
+    (std::uint8_t, ring, ring) (std::uint16_t, noise, noise) (std::uint32_t, range, range)
 )
 
 struct VelodynePointXYZIRT
@@ -50,14 +52,14 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (VelodynePointXYZIRT,
 )
 using PointXYZIRT = VelodynePointXYZIRT;
 
-class ICPRegistration
+class ICPRegistration : public ParamServer
 {
 
 private:
 
-    pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr previous_cloud;
+    pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI> icp;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr                      map_cloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr                      previous_cloud;
 
     tf2_ros::TransformBroadcaster tf_broadcaster;
     Eigen::Matrix4f cumulative_transform = Eigen::Matrix4f::Identity();
@@ -68,7 +70,7 @@ private:
     ros::Publisher  pubExtractedCloud;
 
     std::deque<sensor_msgs::PointCloud2> cloudQueue;
-    std::deque<sensor_msgs::Imu> imuQueue;
+    std::deque<sensor_msgs::Imu>         imuQueue;
 
 
     pcl::PointCloud<PointXYZIRT>::Ptr       laserCloudIn;
@@ -83,11 +85,13 @@ private:
 
     double timeScanCur;
     double timeScanEnd;
+
+    bool has_previous_cloud;
     
 
     cv::Mat rangeMat;
     int deskewFlag;
-    std::mutex imuLock;
+    // std::mutex imuLock;
 
 
 public:
@@ -97,6 +101,7 @@ public:
         pubExtractedCloud = nh.advertise<sensor_msgs::PointCloud2> ("registered_cloud", 1);
         pubLaserOdometryGlobal = nh.advertise<nav_msgs::Odometry>("odometry_ICP", 1);
         allocateMemory();
+        has_previous_cloud = false;
     }
 
     void allocateMemory()
@@ -104,13 +109,13 @@ public:
         laserCloudIn.reset(new pcl::PointCloud<PointXYZIRT>());
         tmpOusterCloudIn.reset(new pcl::PointCloud<OusterPointXYZIRT>());
 
-        fullCloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
-        extractedCloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
+        fullCloud.reset(new pcl::PointCloud<PointXYZIRT>());
+        extractedCloud.reset(new pcl::PointCloud<PointXYZIRT>());
 
         fullCloud->points.resize(N_SCAN*Horizon_SCAN);
 
-        extRot = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRotV.data(), 3, 3);
-        extQRPY = Eigen::Quaterniond(extRPY);
+        // extRot = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(extRotV.data(), 3, 3);
+        // extQRPY = Eigen::Quaterniond(extRPY);
 
         resetParameters();
     }
@@ -147,52 +152,59 @@ public:
         bag.close();
     }
 
-    void imuHandler(const sensor_msgs::Imu::ConstPtr& imuMsg)
-    {
-        sensor_msgs::Imu thisImu = imuConverter(*imuMsg);
+    // void imuHandler(const sensor_msgs::Imu::ConstPtr& imuMsg)
+    // {
+    //     sensor_msgs::Imu thisImu = imuConverter(*imuMsg);
 
-        std::lock_guard<std::mutex> lock1(imuLock);
-        imuQueue.push_back(thisImu);
+    //     std::lock_guard<std::mutex> lock1(imuLock);
+    //     imuQueue.push_back(thisImu);
 
-        // debug IMU data
-        // cout << std::setprecision(6);
-        // cout << "IMU acc: " << endl;
-        // cout << "x: " << thisImu.linear_acceleration.x << 
-        //       ", y: " << thisImu.linear_acceleration.y << 
-        //       ", z: " << thisImu.linear_acceleration.z << endl;
-        // cout << "IMU gyro: " << endl;
-        // cout << "x: " << thisImu.angular_velocity.x << 
-        //       ", y: " << thisImu.angular_velocity.y << 
-        //       ", z: " << thisImu.angular_velocity.z << endl;
-        // double imuRoll, imuPitch, imuYaw;
-        // tf::Quaternion orientation;
-        // tf::quaternionMsgToTF(thisImu.orientation, orientation);
-        // tf::Matrix3x3(orientation).getRPY(imuRoll, imuPitch, imuYaw);
-        // cout << "IMU roll pitch yaw: " << endl;
-        // cout << "roll: " << imuRoll << ", pitch: " << imuPitch << ", yaw: " << imuYaw << endl << endl;
-    }
+    //     // debug IMU data
+    //     // cout << std::setprecision(6);
+    //     // cout << "IMU acc: " << endl;
+    //     // cout << "x: " << thisImu.linear_acceleration.x << 
+    //     //       ", y: " << thisImu.linear_acceleration.y << 
+    //     //       ", z: " << thisImu.linear_acceleration.z << endl;
+    //     // cout << "IMU gyro: " << endl;
+    //     // cout << "x: " << thisImu.angular_velocity.x << 
+    //     //       ", y: " << thisImu.angular_velocity.y << 
+    //     //       ", z: " << thisImu.angular_velocity.z << endl;
+    //     // double imuRoll, imuPitch, imuYaw;
+    //     // tf::Quaternion orientation;
+    //     // tf::quaternionMsgToTF(thisImu.orientation, orientation);
+    //     // tf::Matrix3x3(orientation).getRPY(imuRoll, imuPitch, imuYaw);
+    //     // cout << "IMU roll pitch yaw: " << endl;
+    //     // cout << "roll: " << imuRoll << ", pitch: " << imuPitch << ", yaw: " << imuYaw << endl << endl;
+    // }
 
     void cloudHandler(const sensor_msgs::PointCloud2::ConstPtr &pc_msg)
     {
-            projectPointCloud();
+        timeLaserInfoStamp = pc_msg->header.stamp;
 
-            cloudExtraction();
+        if (!cachePointCloud(pc_msg))
+        return;
 
-            publishClouds();
+        projectPointCloud();
 
-            pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-            cloudHeader = pc_msg->header;
-            timeLaserInfoStamp = pc_msg->header.stamp;
-            pcl::fromROSMsg(*pc_msg, *source_cloud);
+        cloudExtraction();
 
-            // Perform ICP
-            performICP(source_cloud);
+        publishClouds();
 
-            resetParameters();
+
+        // cloudHeader = pc_msg->header;
+        
+        // pcl::fromROSMsg(*pc_msg, *source_cloud);
+
+
+        resetParameters();
     }
 
     bool cachePointCloud(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
     {
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+        // pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+
         // cache point cloud
         cloudQueue.push_back(*laserCloudMsg);
         if (cloudQueue.size() <= 2)
@@ -284,6 +296,10 @@ public:
                 ROS_WARN("Point cloud timestamp not available, deskew function disabled, system will drift significantly!");
         }
 
+        // Perform ICP
+        source_cloud = laserCloudIn;
+        performICP(source_cloud);
+
         return true;
     }
 
@@ -293,7 +309,11 @@ public:
         geometry_msgs::TransformStamped transform_stamped;
         transform_stamped.header = cloudHeader;
         transform_stamped.child_frame_id = "base_link";
-        tf::transformEigenToMsg(transform.cast<double>(), transform_stamped.transform);
+
+        Eigen::Matrix4d transformDouble = transform.cast<double>();
+
+        Eigen::Affine3d affineTransform(transformDouble);
+        tf::transformEigenToMsg(affineTransform, transform_stamped.transform);
 
         // Broadcast the transform
 
@@ -304,7 +324,6 @@ public:
         nav_msgs::Odometry laserOdometryROS;
         
         std::cout << "PUBLISHING ODOMETRY" << endl;
-        nav_msgs::Odometry laserOdometryROS;
         laserOdometryROS.header.stamp = timeLaserInfoStamp;
         laserOdometryROS.header.frame_id = "odom";
         laserOdometryROS.child_frame_id = "odom_mapping";
@@ -327,64 +346,49 @@ public:
         // tf::StampedTransform trans_odom_to_lidar = tf::StampedTransform(t_odom_to_lidar, cloudHeader, "odom", "lidar_link");
         // br.sendTransform(trans_odom_to_lidar);
     }
-    void performICP(const pcl::PointCloud<pcl::PointXYZ>::Ptr &source_cloud)
+    void performICP(const pcl::PointCloud<pcl::PointXYZI>::Ptr &source_cloud)
     {
 
-        pcl::PointCloud<pcl::PointXYZ>::Ptr aligned_cloud;
+         // Setup ICP
+        pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI> icp;
 
-        
-        // Downsample the source cloud to improve efficiency
-        pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
-        voxel_grid.setInputCloud(source_cloud);
-        voxel_grid.setLeafSize(0.1, 0.1, 0.1); 
-        voxel_grid.filter(*source_cloud);
-
-        // Perform ICP registration
-
-        if (!has_previous_cloud)
-        {
-            // If there is no previous point cloud, set the current cloud as the target
-            icp.setInputTarget(source_cloud);
+        if(!has_previous_cloud){
+            previous_cloud = source_cloud;
             has_previous_cloud = true;
+        }
+        else{
+
+            icp.setInputSource(source_cloud);
+            icp.setInputTarget(previous_cloud);
+
+            // Perform ICP registration
+            pcl::PointCloud<pcl::PointXYZI>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZI>);
+            icp.align(*aligned);
+        }
+
+        // Downsample the source cloud to improve efficiency
+        // pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
+        // voxel_grid.setInputCloud(source_cloud);
+        // voxel_grid.setLeafSize(0.1, 0.1, 0.1); 
+        // voxel_grid.filter(*source_cloud);
+
+
+        // Publish odometry
+        if (icp.hasConverged())
+        {
+            std::cout << "ICP converged. Score: " << icp.getFitnessScore() << std::endl; 
+            
+            Eigen::Matrix4f transformation_matrix = icp.getFinalTransformation();
+            cumulative_transform = cumulative_transform * transformation_matrix;
+            publishOdometry(cumulative_transform);
         }
         else
         {
-            // Set the current source cloud
-            icp.setInputSource(source_cloud);
-            icp.setInputTarget(previous_cloud);
-            // Align the current source cloud with the target (previous) cloud
-            icp.align(*aligned_cloud);
-
-            
-
-            // Publish odometry
-            if (icp.hasConverged())
-            {
-                std::cout << "ICP converged. Score: " << icp.getFitnessScore() << std::endl; 
-                
-                Eigen::Matrix4f transformation_matrix = icp.getFinalTransformation();
-                cumulative_transform = cumulative_transform * transformation_matrix;
-                publishOdometry(cumulative_transform);
-            }
-            else
-            {
-                std::cout << "ICP did not converge." << std::endl;
-            }
-            previous_cloud = source_cloud;
-        }   
+            std::cout << "ICP did not converge." << std::endl;
+        }
+        previous_cloud = source_cloud;   
 
     }
-
-    // sensor_msgs::PointCloud2 publishCloud(ros::Publisher *thisPub, pcl::PointCloud<pcl::PointXYZI>::Ptr thisCloud, ros::Time thisStamp, std::string thisFrame)
-    // {
-    //     sensor_msgs::PointCloud2 tempCloud;
-    //     pcl::toROSMsg(*thisCloud, tempCloud);
-    //     tempCloud.header.stamp = thisStamp;
-    //     tempCloud.header.frame_id = thisFrame;
-    //     if (thisPub->getNumSubscribers() != 0)
-    //         thisPub->publish(tempCloud);
-    //     return tempCloud;
-    // }
 
     void publishClouds()
     {

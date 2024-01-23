@@ -1,17 +1,16 @@
 {
     "python.autoComplete.extraPaths": [
-        "/home/joaojorge/SLAM_ws/devel/lib/python3/dist-packages",
-        "/home/joaojorge/SLAM_ws/install_isolated/lib/python3/dist-packages",
+        "/home/joaojorge/LIO_ws/devel/lib/python3/dist-packages",
+        "/home/joaojorge/catkin_ws/install_isolated/lib/python3/dist-packages",
         "/opt/ros/noetic/lib/python3/dist-packages"
     ],
     "python.analysis.extraPaths": [
-        "/home/joaojorge/SLAM_ws/devel/lib/python3/dist-packages",
-        "/home/joaojorge/SLAM_ws/install_isolated/lib/python3/dist-packages",
+        "/home/joaojorge/LIO_ws/devel/lib/python3/dist-packages",
+        "/home/joaojorge/catkin_ws/install_isolated/lib/python3/dist-packages",
         "/opt/ros/noetic/lib/python3/dist-packages"
     ],
+    "cmake.configureOnOpen": false,
     "files.associations": {
-        "*.ipp": "cpp",
-        "random": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -52,6 +51,7 @@
         "memory_resource": "cpp",
         "numeric": "cpp",
         "optional": "cpp",
+        "random": "cpp",
         "ratio": "cpp",
         "string": "cpp",
         "string_view": "cpp",
@@ -79,6 +79,7 @@
         "cfenv": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "*.ipp": "cpp"
     }
 }

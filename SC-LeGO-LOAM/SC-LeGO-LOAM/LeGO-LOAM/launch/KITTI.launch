@@ -1,0 +1,81 @@
+<launch>
+    <!-- Bag com IMU a 10 Hz SEQUENCIA 07 DO KITTI-->
+    <!-- <arg name="bag" value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0027_synced.bag"/> -->
+
+    <!-- Bag com IMU a 100 Hz SEQUENCIA 07 DO KITTI-->
+    <!-- <arg name="bag" value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0027_100_hz_IMU/kitti.bag"/> -->
+
+    <!-- Bag com IMU a 100 Hz SEQUENCIA 00 DO KITTI-->
+    <!-- <arg name="bag" value="/home/joaojorge/Documents/kitti_2011_10_03_drive_0027_100hz_IMU/kitti.bag"/> -->
+
+    <!-- Bag com IMU a 100 Hz SEQUENCIA 05 DO KITTI-->
+    <arg name='bag' value="/home/joaojorge/Documents/kitti_2011_09_30_drive_0018_100HZ_IMU/kitti.bag"/>
+
+    <!-- Bag com IMU a 100 Hz SEQUENCIA 02 DO KITTI-->
+    <!-- <arg name='bag' value="/home/joaojorge/Documents/kitti_2011_10_03_drive_0034_100HZ_IMU/kitti.bag"/> -->
+
+    <!--- Sim Time -->
+    <param name="/use_sim_time" value="true" />
+
+    <!---         PARAMETERS               -->
+
+    <param name="method" type="str" value="ficheiro" />
+
+
+    <!--           METHODS               -->
+    <!--
+    
+                    SC                 
+                    ficheiro
+                    fusion              
+                                         --> 
+    <param name="loopclosureFlag" type="bool" value="true"/>
+    <param name="GT_flag" type="bool" value="true"/>
+    
+    <!-- ALGORITMOS FICHEIROS VLAD,ORCHNET, ETC-->
+    <param name="file_prediction" type ="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/prediction.txt" />
+    <param name="file_score" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/similarity.txt" />
+    <param name="ground_truth" type="str" value="/home/joaojorge/Documents/relocalization/SEQ05/VLAD/targets.txt" /> 
+
+    <!-- <param name="fusion" type="bool" value="false"/> -->
+    <!-- <param name="algorithm" type ="int" value ="1" /> -->
+
+    <!--           ALGORITHMS               -->
+    <!--
+    
+    VALUE 1        ->             VLAD ALGORITHM
+    VALUE 2        ->             SPOC ALGORITHM
+    VALUE 3        ->             ORCHNET ALGORITHM
+    VALUE 4        ->             GEM ALGORITHM--> 
+
+    <!--- rosbag play -->
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
+        <!-- 10 HZ IMU-->
+        <!-- <remap from="/kitti/oxts/imu" to="/imu/data" />   
+        <remap from="/kitti/velo/pointcloud" to="/velodyne_points" /> -->
+
+        <!-- 100 HZ IMU -->
+        <remap from="/imu_raw" to="/imu/data" />
+        <remap from="/points_raw" to="/velodyne_points" />
+
+    </node>
+
+    <!--- Run Rviz-->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find lego_loam)/launch/test.rviz" />
+
+    <!--- TF -->
+    <node pkg="tf" type="static_transform_publisher" name="camera_init_to_map"  args="0 0 0 1.570795   0        1.570795 /map    /camera_init 10" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 -1.570795 -1.570795 0        /camera /base_link   10" />
+
+    <!--- Robot State TF -->
+    <include file="$(find lego_loam)/launch/include/module_KITTI_state_publisher.launch" />
+
+    <!--- LeGO-LOAM -->    
+    <node pkg="lego_loam" type="imageProjection"    name="imageProjection"    output="screen"/>
+    <node pkg="lego_loam" type="featureAssociation" name="featureAssociation" output="screen"/>
+    <node pkg="lego_loam" type="mapOptmization"     name="mapOptmization"     output="screen"/>
+    <node pkg="lego_loam" type="transformFusion"    name="transformFusion"    output="screen"/>
+
+    <node pkg="lego_loam" type="save_pose" name="save_pose" output="screen"/>
+
+</launch>

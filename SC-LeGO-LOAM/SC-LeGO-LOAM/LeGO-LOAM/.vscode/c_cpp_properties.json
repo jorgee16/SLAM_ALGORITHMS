@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/home/joaojorge/LIO_ws/devel/include/**",
+                "/home/joaojorge/catkin_ws/install_isolated/include/**",
+                "/opt/ros/noetic/include/**",
+                "/home/joaojorge/LIO_ws/src/SC-LeGO-LOAM/SC-LeGO-LOAM/LeGO-LOAM/include/**",
+                "/home/joaojorge/LIO_ws/src/LIO-SAM/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

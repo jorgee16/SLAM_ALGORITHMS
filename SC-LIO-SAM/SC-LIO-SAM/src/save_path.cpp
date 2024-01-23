@@ -42,7 +42,22 @@ void callhandler(const nav_msgs::Odometry::ConstPtr& msg)
 
         // Save the transformation matrix to the file
         // ofs << msg->header.stamp << " ";
-        ofs << transformation_matrix << "\n";
+        // ofs << transformation_matrix << "\n";
+
+        ofs << rotation_matrix[0][0] << " ";
+        ofs << rotation_matrix[0][1] << " ";
+        ofs << rotation_matrix[0][2] << " ";
+        ofs << rotation_matrix[1][0] << " ";
+        ofs << rotation_matrix[1][1] << " ";
+        ofs << rotation_matrix[1][2] << " ";
+        ofs << rotation_matrix[2][0] << " ";
+        ofs << rotation_matrix[2][1] << " ";
+        ofs << rotation_matrix[2][2] << " ";
+        ofs << 0 << " ";
+        ofs << 0 << " ";
+        ofs << 0 << " ";
+        ofs << 1 << " ";
+
 
         // ofs << msg->header.stamp << " ";
         // ofs << msg->pose.pose.position.x << " ";
