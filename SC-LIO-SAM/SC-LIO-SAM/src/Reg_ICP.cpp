@@ -22,6 +22,8 @@
 
 #include "utility.h"
 
+typedef pcl::PointXYZI PointType;
+
 struct OusterPointXYZIRT {
     PCL_ADD_POINT4D;
     float intensity;
@@ -57,9 +59,9 @@ class ICPRegistration : public ParamServer
 
 private:
 
-    pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI> icp;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr                      map_cloud;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr                      previous_cloud;
+    // pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI> icp;
+    pcl::PointCloud<PointType>::Ptr                      map_cloud;
+    pcl::PointCloud<PointType>::Ptr                      previous_cloud;
 
     tf2_ros::TransformBroadcaster tf_broadcaster;
     Eigen::Matrix4f cumulative_transform = Eigen::Matrix4f::Identity();
@@ -68,6 +70,7 @@ private:
     ros::Subscriber subLaserCloud;
     ros::Publisher  pubLaserOdometryGlobal;
     ros::Publisher  pubExtractedCloud;
+    ros::Publisher pubIcpKeyFrames;
 
     std::deque<sensor_msgs::PointCloud2> cloudQueue;
     std::deque<sensor_msgs::Imu>         imuQueue;
@@ -75,8 +78,8 @@ private:
 
     pcl::PointCloud<PointXYZIRT>::Ptr       laserCloudIn;
     pcl::PointCloud<OusterPointXYZIRT>::Ptr tmpOusterCloudIn;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr    extractedCloud;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr    fullCloud;
+    pcl::PointCloud<PointType>::Ptr    extractedCloud;
+    pcl::PointCloud<PointType>::Ptr    fullCloud;
 
     sensor_msgs::PointCloud2 currentCloudMsg;
     std_msgs::Header         cloudHeader;
@@ -100,6 +103,7 @@ public:
         subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("points_raw", 5, &ICPRegistration::cloudHandler, this, ros::TransportHints().tcpNoDelay());
         pubExtractedCloud = nh.advertise<sensor_msgs::PointCloud2> ("registered_cloud", 1);
         pubLaserOdometryGlobal = nh.advertise<nav_msgs::Odometry>("odometry_ICP", 1);
+        pubIcpKeyFrames       = nh.advertise<sensor_msgs::PointCloud2>("icp_corrected_cloud", 1);
         allocateMemory();
         has_previous_cloud = false;
     }
@@ -109,8 +113,8 @@ public:
         laserCloudIn.reset(new pcl::PointCloud<PointXYZIRT>());
         tmpOusterCloudIn.reset(new pcl::PointCloud<OusterPointXYZIRT>());
 
-        fullCloud.reset(new pcl::PointCloud<PointXYZIRT>());
-        extractedCloud.reset(new pcl::PointCloud<PointXYZIRT>());
+        fullCloud.reset(new pcl::PointCloud<PointType>());
+        extractedCloud.reset(new pcl::PointCloud<PointType>());
 
         fullCloud->points.resize(N_SCAN*Horizon_SCAN);
 
@@ -128,29 +132,52 @@ public:
 
     ~ICPRegistration(){}
 
-    void processBag(const std::string &bag_file)
+    pcl::PointCloud<PointType>::Ptr transformPointCloud(pcl::PointCloud<PointType>::Ptr cloudIn, PointTypePose* transformIn)
     {
-        rosbag::Bag bag;
-        bag.open(bag_file, rosbag::bagmode::Read);
+        pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
 
-        for (const rosbag::MessageInstance &msg : rosbag::View(bag))
+        PointType *pointFrom;
+
+        int cloudSize = cloudIn->size();
+        cloudOut->resize(cloudSize);
+
+        Eigen::Affine3f transCur = pcl::getTransformation(transformIn->x, transformIn->y, transformIn->z, transformIn->roll, transformIn->pitch, transformIn->yaw);
+        
+        #pragma omp parallel for num_threads(numberOfCores)
+        for (int i = 0; i < cloudSize; ++i)
         {
-            if (msg.isType<sensor_msgs::Imu>() && msg.getTopic() == "/your_imu_topic")
-            {
-                // Handle IMU data
-                sensor_msgs::Imu::ConstPtr imu_msg = msg.instantiate<sensor_msgs::Imu>();
-                // handleImuData(imu_msg);
-            }
-            else if (msg.isType<sensor_msgs::PointCloud2>() && msg.getTopic() == "/your_lidar_topic")
-            {
-                // Handle LiDAR data
-                sensor_msgs::PointCloud2::ConstPtr pc_msg = msg.instantiate<sensor_msgs::PointCloud2>();
-                cloudHandler(pc_msg);
-            }
+            pointFrom = &cloudIn->points[i];
+            cloudOut->points[i].x = transCur(0,0) * pointFrom->x + transCur(0,1) * pointFrom->y + transCur(0,2) * pointFrom->z + transCur(0,3);
+            cloudOut->points[i].y = transCur(1,0) * pointFrom->x + transCur(1,1) * pointFrom->y + transCur(1,2) * pointFrom->z + transCur(1,3);
+            cloudOut->points[i].z = transCur(2,0) * pointFrom->x + transCur(2,1) * pointFrom->y + transCur(2,2) * pointFrom->z + transCur(2,3);
+            cloudOut->points[i].intensity = pointFrom->intensity;
         }
-
-        bag.close();
+        return cloudOut;
     }
+
+    // void processBag(const std::string &bag_file)
+    // {
+    //     rosbag::Bag bag;
+    //     bag.open(bag_file, rosbag::bagmode::Read);
+
+    //     for (const rosbag::MessageInstance &msg : rosbag::View(bag))
+    //     {
+    //         if (msg.isType<sensor_msgs::Imu>() && msg.getTopic() == "/your_imu_topic")
+    //         {
+    //             // Handle IMU data
+    //             sensor_msgs::Imu::ConstPtr imu_msg = msg.instantiate<sensor_msgs::Imu>();
+    //             // handleImuData(imu_msg);
+    //         }
+    //         else if (msg.isType<sensor_msgs::PointCloud2>() && msg.getTopic() == "/your_lidar_topic")
+    //         {
+    //             // Handle LiDAR data
+    //             sensor_msgs::PointCloud2::ConstPtr pc_msg = msg.instantiate<sensor_msgs::PointCloud2>();
+    //             cloudHandler(pc_msg);
+    //         }
+    //     }
+
+    //     bag.close();
+    // }
 
     // void imuHandler(const sensor_msgs::Imu::ConstPtr& imuMsg)
     // {
@@ -190,20 +217,18 @@ public:
 
         publishClouds();
 
+        // Perform ICP
+        pcl::PointCloud<PointType>::Ptr source_cloud(new pcl::PointCloud<PointType>());
+        source_cloud = fullCloud;
 
-        // cloudHeader = pc_msg->header;
+        performICP(source_cloud);
         
-        // pcl::fromROSMsg(*pc_msg, *source_cloud);
-
 
         resetParameters();
     }
 
     bool cachePointCloud(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
     {
-
-        pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud(new pcl::PointCloud<pcl::PointXYZI>);
-        // pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
         // cache point cloud
         cloudQueue.push_back(*laserCloudMsg);
@@ -296,9 +321,7 @@ public:
                 ROS_WARN("Point cloud timestamp not available, deskew function disabled, system will drift significantly!");
         }
 
-        // Perform ICP
-        source_cloud = laserCloudIn;
-        performICP(source_cloud);
+
 
         return true;
     }
@@ -330,9 +353,11 @@ public:
         laserOdometryROS.pose.pose.position.x = transform(0, 3);
         laserOdometryROS.pose.pose.position.y = transform(1, 3);
         laserOdometryROS.pose.pose.position.z = transform(2, 3);
-        tf::Quaternion q;
+        // tf::Quaternion q;
 
-        tf::Matrix3x3(transform.block<3, 3>(0, 0).cast<double>()).getRotation(q);
+        Eigen::Matrix3f rotationMatrix = transform.block<3, 3>(0, 0);
+        Eigen::Quaternionf q(rotationMatrix);
+
         laserOdometryROS.pose.pose.orientation.x = q.x();
         laserOdometryROS.pose.pose.orientation.y = q.y();
         laserOdometryROS.pose.pose.orientation.z = q.z();
@@ -346,11 +371,16 @@ public:
         // tf::StampedTransform trans_odom_to_lidar = tf::StampedTransform(t_odom_to_lidar, cloudHeader, "odom", "lidar_link");
         // br.sendTransform(trans_odom_to_lidar);
     }
-    void performICP(const pcl::PointCloud<pcl::PointXYZI>::Ptr &source_cloud)
+    void performICP(const pcl::PointCloud<PointType>::Ptr& source_cloud)
     {
 
          // Setup ICP
-        pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI> icp;
+        static pcl::IterativeClosestPoint<PointType, PointType> icp;
+        icp.setMaxCorrespondenceDistance(100);
+        icp.setMaximumIterations(100);
+        icp.setTransformationEpsilon(1e-6);
+        icp.setEuclideanFitnessEpsilon(1e-6);
+        icp.setRANSACIterations(0);
 
         if(!has_previous_cloud){
             previous_cloud = source_cloud;
@@ -362,7 +392,7 @@ public:
             icp.setInputTarget(previous_cloud);
 
             // Perform ICP registration
-            pcl::PointCloud<pcl::PointXYZI>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZI>);
+            pcl::PointCloud<PointType>::Ptr aligned(new pcl::PointCloud<PointType>());
             icp.align(*aligned);
         }
 
@@ -378,6 +408,12 @@ public:
         {
             std::cout << "ICP converged. Score: " << icp.getFitnessScore() << std::endl; 
             
+            // Get pose transformation
+            // float x, y, z, roll, pitch, yaw;
+            // Eigen::Affine3f correctionLidarFrame;
+            // correctionLidarFrame = icp.getFinalTransformation();
+
+
             Eigen::Matrix4f transformation_matrix = icp.getFinalTransformation();
             cumulative_transform = cumulative_transform * transformation_matrix;
             publishOdometry(cumulative_transform);
@@ -385,9 +421,18 @@ public:
         else
         {
             std::cout << "ICP did not converge." << std::endl;
+            previous_cloud = source_cloud;
+            return;
         }
-        previous_cloud = source_cloud;   
-
+           
+        
+        // publish corrected cloud
+        if (pubIcpKeyFrames.getNumSubscribers() != 0)
+        {
+            pcl::PointCloud<PointType>::Ptr closed_cloud(new pcl::PointCloud<PointType>());
+            pcl::transformPointCloud(*cureKeyframeCloud, *closed_cloud, icp.getFinalTransformation());
+            publishCloud(&pubIcpKeyFrames, closed_cloud, timeLaserInfoStamp, "odom");
+        }
     }
 
     void publishClouds()
@@ -469,6 +514,30 @@ public:
         }
     }
 
+    void loopFindNearKeyframes(pcl::PointCloud<PointType>::Ptr& nearKeyframes, const int& key, const int& searchNum)
+    {
+        // extract near keyframes
+        nearKeyframes->clear();
+        int cloudSize = copy_cloudKeyPoses6D->size();
+        for (int i = -searchNum; i <= searchNum; ++i)
+        {
+            int keyNear = key + i;
+            if (keyNear < 0 || keyNear >= cloudSize )
+                continue;
+            *nearKeyframes += *transformPointCloud(cornerCloudKeyFrames[keyNear], &copy_cloudKeyPoses6D->points[keyNear]);
+            *nearKeyframes += *transformPointCloud(surfCloudKeyFrames[keyNear],   &copy_cloudKeyPoses6D->points[keyNear]);
+        }
+
+        if (nearKeyframes->empty())
+            return;
+
+        // downsample near keyframes
+        pcl::PointCloud<PointType>::Ptr cloud_temp(new pcl::PointCloud<PointType>());
+        downSizeFilterICP.setInputCloud(nearKeyframes);
+        downSizeFilterICP.filter(*cloud_temp);
+        *nearKeyframes = *cloud_temp;
+    }
+
     // float pointDistance(pcl::PointXYZI p1, pcl::PointXYZI p2)
     // {
     //     return sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) + (p1.z-p2.z)*(p1.z-p2.z));
@@ -516,8 +585,8 @@ public:
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "icp_registration_node");
-    ICPRegistration icp_reg;
-    icp_reg.processBag("your_bag_file.bag");
+    // ICPRegistration icp_reg;
+    // icp_reg.processBag("your_bag_file.bag");
 
     return 0;
 }
