@@ -1,26 +1,16 @@
-#include <tf2_ros/transform_broadcaster.h>
-#include <geometry_msgs/TransformStamped.h>
-#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/registration/icp.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/visualization/cloud_viewer.h>
-#include <tf/transform_datatypes.h>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/PoseWithCovariance.h>
+#include <geometry_msgs/Transform.h>
+#include <std_msgs/Float64.h>
+
+#include <Eigen/Dense>
 #include <Eigen/Geometry>
-
 #include <eigen_conversions/eigen_msg.h>
-#include <rosbag/view.h>
-#include <rosbag/message_instance.h>
-#include <tf2_eigen/tf2_eigen.h>
-
-#include <opencv2/opencv.hpp>
 
 #include "utility.h"
+#include "utils/pose6DOF.h"
+#include "utils/geometric_utils.h"
+#include "utils/messaging_utils.h"
 
 typedef pcl::PointXYZI PointType;
 
@@ -59,7 +49,6 @@ class ICPRegistration : public ParamServer
 
 private:
 
-    // pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI> icp;
     pcl::PointCloud<PointType>::Ptr                      map_cloud;
     pcl::PointCloud<PointType>::Ptr                      previous_cloud;
 
@@ -91,7 +80,9 @@ private:
 
     bool has_previous_cloud;
     
-
+    Pose6DOF icp_latest_transform_;
+    std::vector<Pose6DOF> icp_odom_poses_;
+    
     cv::Mat rangeMat;
     int deskewFlag;
     // std::mutex imuLock;
@@ -128,32 +119,33 @@ public:
     {
         laserCloudIn->clear();
         extractedCloud->clear();
+        rangeMat = cv::Mat(N_SCAN, Horizon_SCAN, CV_32F, cv::Scalar::all(FLT_MAX));
     }
 
     ~ICPRegistration(){}
 
-    pcl::PointCloud<PointType>::Ptr transformPointCloud(pcl::PointCloud<PointType>::Ptr cloudIn, PointTypePose* transformIn)
-    {
-        pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
+    // pcl::PointCloud<PointType>::Ptr transformPointCloud(pcl::PointCloud<PointType>::Ptr cloudIn, PointTypePose* transformIn)
+    // {
+    //     pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
 
-        PointType *pointFrom;
+    //     PointType *pointFrom;
 
-        int cloudSize = cloudIn->size();
-        cloudOut->resize(cloudSize);
+    //     int cloudSize = cloudIn->size();
+    //     cloudOut->resize(cloudSize);
 
-        Eigen::Affine3f transCur = pcl::getTransformation(transformIn->x, transformIn->y, transformIn->z, transformIn->roll, transformIn->pitch, transformIn->yaw);
+    //     Eigen::Affine3f transCur = pcl::getTransformation(transformIn->x, transformIn->y, transformIn->z, transformIn->roll, transformIn->pitch, transformIn->yaw);
         
-        #pragma omp parallel for num_threads(numberOfCores)
-        for (int i = 0; i < cloudSize; ++i)
-        {
-            pointFrom = &cloudIn->points[i];
-            cloudOut->points[i].x = transCur(0,0) * pointFrom->x + transCur(0,1) * pointFrom->y + transCur(0,2) * pointFrom->z + transCur(0,3);
-            cloudOut->points[i].y = transCur(1,0) * pointFrom->x + transCur(1,1) * pointFrom->y + transCur(1,2) * pointFrom->z + transCur(1,3);
-            cloudOut->points[i].z = transCur(2,0) * pointFrom->x + transCur(2,1) * pointFrom->y + transCur(2,2) * pointFrom->z + transCur(2,3);
-            cloudOut->points[i].intensity = pointFrom->intensity;
-        }
-        return cloudOut;
-    }
+    //     #pragma omp parallel for num_threads(numberOfCores)
+    //     for (int i = 0; i < cloudSize; ++i)
+    //     {
+    //         pointFrom = &cloudIn->points[i];
+    //         cloudOut->points[i].x = transCur(0,0) * pointFrom->x + transCur(0,1) * pointFrom->y + transCur(0,2) * pointFrom->z + transCur(0,3);
+    //         cloudOut->points[i].y = transCur(1,0) * pointFrom->x + transCur(1,1) * pointFrom->y + transCur(1,2) * pointFrom->z + transCur(1,3);
+    //         cloudOut->points[i].z = transCur(2,0) * pointFrom->x + transCur(2,1) * pointFrom->y + transCur(2,2) * pointFrom->z + transCur(2,3);
+    //         cloudOut->points[i].intensity = pointFrom->intensity;
+    //     }
+    //     return cloudOut;
+    // }
 
     // void processBag(const std::string &bag_file)
     // {
@@ -427,13 +419,50 @@ public:
            
         
         // publish corrected cloud
-        if (pubIcpKeyFrames.getNumSubscribers() != 0)
-        {
-            pcl::PointCloud<PointType>::Ptr closed_cloud(new pcl::PointCloud<PointType>());
-            pcl::transformPointCloud(*cureKeyframeCloud, *closed_cloud, icp.getFinalTransformation());
-            publishCloud(&pubIcpKeyFrames, closed_cloud, timeLaserInfoStamp, "odom");
-        }
+        // if (pubIcpKeyFrames.getNumSubscribers() != 0)
+        // {
+        //     pcl::PointCloud<PointType>::Ptr closed_cloud(new pcl::PointCloud<PointType>());
+        //     pcl::transformPointCloud(*cureKeyframeCloud, *closed_cloud, icp.getFinalTransformation());
+        //     publishCloud(&pubIcpKeyFrames, closed_cloud, timeLaserInfoStamp, "odom");
+        // }
     }
+
+    //  void publishFrames()
+    // {
+    //     if (cloudKeyPoses3D->points.empty())
+    //         return;
+    //     // publish key poses
+    //     std::cout << "PUBLISHING FRAMES" << endl;
+    //     publishCloud(&pubKeyPoses, cloudKeyPoses3D, timeLaserInfoStamp, odometryFrame);
+    //     // Publish surrounding key frames
+    //     publishCloud(&pubRecentKeyFrames, laserCloudSurfFromMapDS, timeLaserInfoStamp, odometryFrame);
+    //     // publish registered key frame
+    //     if (pubRecentKeyFrame.getNumSubscribers() != 0)
+    //     {
+    //         pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
+    //         PointTypePose thisPose6D = trans2PointTypePose(transformTobeMapped);
+    //         *cloudOut += *transformPointCloud(laserCloudCornerLastDS,  &thisPose6D);
+    //         *cloudOut += *transformPointCloud(laserCloudSurfLastDS,    &thisPose6D);
+    //         publishCloud(&pubRecentKeyFrame, cloudOut, timeLaserInfoStamp, odometryFrame);
+    //     }
+    //     // publish registered high-res raw cloud
+    //     if (pubCloudRegisteredRaw.getNumSubscribers() != 0)
+    //     {
+    //         pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
+    //         pcl::fromROSMsg(cloudInfo.cloud_deskewed, *cloudOut);
+    //         PointTypePose thisPose6D = trans2PointTypePose(transformTobeMapped);
+    //         *cloudOut = *transformPointCloud(cloudOut,  &thisPose6D);
+    //         publishCloud(&pubCloudRegisteredRaw, cloudOut, timeLaserInfoStamp, odometryFrame);
+    //     }
+    //     // publish path
+    //     std::cout << "PUBLISH PATH" << endl;
+    //     if (pubPath.getNumSubscribers() != 0)
+    //     {
+    //         globalPath.header.stamp = timeLaserInfoStamp;
+    //         globalPath.header.frame_id = odometryFrame;
+    //         pubPath.publish(globalPath);
+    //     }
+    // }
 
     void publishClouds()
     {
@@ -514,70 +543,28 @@ public:
         }
     }
 
-    void loopFindNearKeyframes(pcl::PointCloud<PointType>::Ptr& nearKeyframes, const int& key, const int& searchNum)
-    {
-        // extract near keyframes
-        nearKeyframes->clear();
-        int cloudSize = copy_cloudKeyPoses6D->size();
-        for (int i = -searchNum; i <= searchNum; ++i)
-        {
-            int keyNear = key + i;
-            if (keyNear < 0 || keyNear >= cloudSize )
-                continue;
-            *nearKeyframes += *transformPointCloud(cornerCloudKeyFrames[keyNear], &copy_cloudKeyPoses6D->points[keyNear]);
-            *nearKeyframes += *transformPointCloud(surfCloudKeyFrames[keyNear],   &copy_cloudKeyPoses6D->points[keyNear]);
-        }
-
-        if (nearKeyframes->empty())
-            return;
-
-        // downsample near keyframes
-        pcl::PointCloud<PointType>::Ptr cloud_temp(new pcl::PointCloud<PointType>());
-        downSizeFilterICP.setInputCloud(nearKeyframes);
-        downSizeFilterICP.filter(*cloud_temp);
-        *nearKeyframes = *cloud_temp;
-    }
-
-    // float pointDistance(pcl::PointXYZI p1, pcl::PointXYZI p2)
+    // void loopFindNearKeyframes(pcl::PointCloud<PointType>::Ptr& nearKeyframes, const int& key, const int& searchNum)
     // {
-    //     return sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) + (p1.z-p2.z)*(p1.z-p2.z));
-    // }
-
-    // float pointDistance(pcl::PointXYZI p)
-    // {
-    //     return sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
-    // }
-
-    // sensor_msgs::Imu imuConverter(const sensor_msgs::Imu& imu_in)
-    // {
-    //     sensor_msgs::Imu imu_out = imu_in;
-    //     // rotate acceleration
-    //     Eigen::Vector3d acc(imu_in.linear_acceleration.x, imu_in.linear_acceleration.y, imu_in.linear_acceleration.z);
-    //     acc = extRot * acc;
-    //     imu_out.linear_acceleration.x = acc.x();
-    //     imu_out.linear_acceleration.y = acc.y();
-    //     imu_out.linear_acceleration.z = acc.z();
-    //     // rotate gyroscope
-    //     Eigen::Vector3d gyr(imu_in.angular_velocity.x, imu_in.angular_velocity.y, imu_in.angular_velocity.z);
-    //     gyr = extRot * gyr;
-    //     imu_out.angular_velocity.x = gyr.x();
-    //     imu_out.angular_velocity.y = gyr.y();
-    //     imu_out.angular_velocity.z = gyr.z();
-    //     // rotate roll pitch yaw
-    //     Eigen::Quaterniond q_from(imu_in.orientation.w, imu_in.orientation.x, imu_in.orientation.y, imu_in.orientation.z);
-    //     Eigen::Quaterniond q_final = q_from * extQRPY;
-    //     imu_out.orientation.x = q_final.x();
-    //     imu_out.orientation.y = q_final.y();
-    //     imu_out.orientation.z = q_final.z();
-    //     imu_out.orientation.w = q_final.w();
-
-    //     if (sqrt(q_final.x()*q_final.x() + q_final.y()*q_final.y() + q_final.z()*q_final.z() + q_final.w()*q_final.w()) < 0.1)
+    //     // extract near keyframes
+    //     nearKeyframes->clear();
+    //     int cloudSize = copy_cloudKeyPoses6D->size();
+    //     for (int i = -searchNum; i <= searchNum; ++i)
     //     {
-    //         ROS_ERROR("Invalid quaternion, please use a 9-axis IMU!");
-    //         ros::shutdown();
+    //         int keyNear = key + i;
+    //         if (keyNear < 0 || keyNear >= cloudSize )
+    //             continue;
+    //         *nearKeyframes += *transformPointCloud(cornerCloudKeyFrames[keyNear], &copy_cloudKeyPoses6D->points[keyNear]);
+    //         *nearKeyframes += *transformPointCloud(surfCloudKeyFrames[keyNear],   &copy_cloudKeyPoses6D->points[keyNear]);
     //     }
 
-    //     return imu_out;
+    //     if (nearKeyframes->empty())
+    //         return;
+
+    //     // downsample near keyframes
+    //     pcl::PointCloud<PointType>::Ptr cloud_temp(new pcl::PointCloud<PointType>());
+    //     downSizeFilterICP.setInputCloud(nearKeyframes);
+    //     downSizeFilterICP.filter(*cloud_temp);
+    //     *nearKeyframes = *cloud_temp;
     // }
 };
 

@@ -76,6 +76,15 @@ link_directories(
 ###########
 ## Build ##
 ###########
+add_library(UTILS
+  src/utils/pose6DOF.cpp
+  src/utils/geometric_utils.cpp
+  src/utils/messaging_utils.cpp
+)
+
+target_link_libraries(UTILS 
+${catkin_LIBRARIES}
+)
 
 # Range Image Projection
 add_executable(${PROJECT_NAME}_imageProjection src/imageProjection.cpp)
@@ -107,4 +116,6 @@ target_link_libraries(save_path ${catkin_LIBRARIES})
 
 add_executable(Reg_ICP src/Reg_ICP.cpp)
 add_dependencies(Reg_ICP ${catkin_EXPORTED_TARGETS})
-target_link_libraries(Reg_ICP ${catkin_LIBRARIES})
+target_link_libraries(Reg_ICP ${catkin_LIBRARIES} UTILS)
+
+

@@ -1,6 +1,12 @@
 [
 {
   "directory": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/build",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"lio_sam\\\" -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -Idevel/include -I/usr/include/vtk-7.1 -I/usr/include/freetype2 -I/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -I/usr/include/eigen3 -I/usr/include/pcl-1.10 -I/usr/include/ni -I/usr/include/openni2 -I/usr/local/lib/cmake/GTSAM/../../../include  -std=c++14  -O3 -Wall -g -pthread   -o CMakeFiles/Reg_ICP.dir/src/Reg_ICP.cpp.o -c /home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/Reg_ICP.cpp",
+  "file": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/Reg_ICP.cpp"
+},
+
+{
+  "directory": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/build",
   "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"lio_sam\\\" -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -Idevel/include -I/usr/include/vtk-7.1 -I/usr/include/freetype2 -I/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -I/usr/include/eigen3 -I/usr/include/pcl-1.10 -I/usr/include/ni -I/usr/include/openni2 -I/usr/local/lib/cmake/GTSAM/../../../include  -std=c++14  -O3 -Wall -g -pthread   -o CMakeFiles/save_path.dir/src/save_path.cpp.o -c /home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/save_path.cpp",
   "file": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/save_path.cpp"
 },
@@ -27,6 +33,12 @@
   "directory": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/build",
   "command": "/usr/bin/g++  -DDISABLE_LIBUSB_1_0 -DDISABLE_PCAP -DDISABLE_PNG -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"lio_sam\\\" -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -Idevel/include -I/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/local/lib/cmake/GTSAM/../../../include -isystem /usr/include/vtk-7.1 -isystem /usr/include/freetype2 -isystem /usr/include/opencv4 -isystem /usr/include/eigen3 -isystem /usr/include/pcl-1.10 -isystem /usr/include/ni -isystem /usr/include/openni2  -std=c++14  -O3 -Wall -g -pthread   -o CMakeFiles/lio_sam_imageProjection.dir/src/imageProjection.cpp.o -c /home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/imageProjection.cpp",
   "file": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/imageProjection.cpp"
+},
+
+{
+  "directory": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/build",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"lio_sam\\\" -DUTILS_EXPORTS -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -Idevel/include -I/usr/include/vtk-7.1 -I/usr/include/freetype2 -I/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/include/opencv4 -I/usr/include/eigen3 -I/usr/include/pcl-1.10 -I/usr/include/ni -I/usr/include/openni2 -I/usr/local/lib/cmake/GTSAM/../../../include  -std=c++14  -O3 -Wall -g -pthread -fPIC   -o CMakeFiles/UTILS.dir/src/utils/pose6DOF.cpp.o -c /home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/utils/pose6DOF.cpp",
+  "file": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/src/utils/pose6DOF.cpp"
 },
 
 {

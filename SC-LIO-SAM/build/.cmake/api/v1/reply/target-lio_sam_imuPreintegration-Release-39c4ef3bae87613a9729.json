@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "devel/lib/lio_sam/lio_sam_featureExtraction"
+			"path" : "devel/lib/lio_sam/lio_sam_imuPreintegration"
 		}
 	],
 	"backtrace" : 1,
@@ -13,7 +13,6 @@
 			"add_executable",
 			"link_directories",
 			"target_link_libraries",
-			"add_dependencies",
 			"add_definitions",
 			"include",
 			"find_package",
@@ -52,226 +51,220 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 92,
+				"line" : 108,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 75,
+				"line" : 69,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 94,
+				"line" : 109,
 				"parent" : 0
 			},
 			{
-				"command" : 3,
-				"file" : 0,
-				"line" : 93,
-				"parent" : 0
-			},
-			{
-				"command" : 6,
+				"command" : 5,
 				"file" : 0,
 				"line" : 11,
 				"parent" : 0
 			},
 			{
 				"file" : 6,
-				"parent" : 5
-			},
-			{
-				"command" : 6,
-				"file" : 6,
-				"line" : 76,
-				"parent" : 6
-			},
-			{
-				"file" : 5,
-				"parent" : 7
-			},
-			{
-				"command" : 6,
-				"file" : 5,
-				"line" : 197,
-				"parent" : 8
-			},
-			{
-				"file" : 4,
-				"parent" : 9
-			},
-			{
-				"command" : 6,
-				"file" : 4,
-				"line" : 197,
-				"parent" : 10
-			},
-			{
-				"file" : 3,
-				"parent" : 11
-			},
-			{
-				"command" : 6,
-				"file" : 3,
-				"line" : 197,
-				"parent" : 12
-			},
-			{
-				"file" : 2,
-				"parent" : 13
+				"parent" : 4
 			},
 			{
 				"command" : 5,
+				"file" : 6,
+				"line" : 76,
+				"parent" : 5
+			},
+			{
+				"file" : 5,
+				"parent" : 6
+			},
+			{
+				"command" : 5,
+				"file" : 5,
+				"line" : 197,
+				"parent" : 7
+			},
+			{
+				"file" : 4,
+				"parent" : 8
+			},
+			{
+				"command" : 5,
+				"file" : 4,
+				"line" : 197,
+				"parent" : 9
+			},
+			{
+				"file" : 3,
+				"parent" : 10
+			},
+			{
+				"command" : 5,
+				"file" : 3,
+				"line" : 197,
+				"parent" : 11
+			},
+			{
+				"file" : 2,
+				"parent" : 12
+			},
+			{
+				"command" : 4,
 				"file" : 2,
 				"line" : 222,
-				"parent" : 14
+				"parent" : 13
 			},
 			{
 				"file" : 1,
+				"parent" : 14
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 12,
 				"parent" : 15
 			},
 			{
 				"command" : 4,
-				"file" : 1,
-				"line" : 12,
-				"parent" : 16
-			},
-			{
-				"command" : 5,
 				"file" : 6,
 				"line" : 20,
-				"parent" : 6
+				"parent" : 5
 			},
 			{
 				"file" : 8,
-				"parent" : 18
-			},
-			{
-				"command" : 7,
-				"file" : 8,
-				"line" : 174,
-				"parent" : 19
-			},
-			{
-				"command" : 4,
-				"file" : 7,
-				"line" : 18,
-				"parent" : 20
-			},
-			{
-				"command" : 4,
-				"file" : 1,
-				"line" : 8,
-				"parent" : 16
+				"parent" : 17
 			},
 			{
 				"command" : 6,
+				"file" : 8,
+				"line" : 174,
+				"parent" : 18
+			},
+			{
+				"command" : 3,
+				"file" : 7,
+				"line" : 18,
+				"parent" : 19
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 8,
+				"parent" : 15
+			},
+			{
+				"command" : 5,
 				"file" : 0,
 				"line" : 27,
 				"parent" : 0
 			},
 			{
 				"file" : 10,
-				"parent" : 23
-			},
-			{
-				"command" : 9,
-				"file" : 10,
-				"line" : 548,
-				"parent" : 24
+				"parent" : 22
 			},
 			{
 				"command" : 8,
 				"file" : 10,
-				"line" : 320,
-				"parent" : 25
-			},
-			{
-				"command" : 6,
-				"file" : 10,
-				"line" : 165,
-				"parent" : 26
-			},
-			{
-				"file" : 9,
-				"parent" : 27
-			},
-			{
-				"command" : 4,
-				"file" : 9,
-				"line" : 88,
-				"parent" : 28
-			},
-			{
-				"command" : 9,
-				"file" : 10,
 				"line" : 548,
+				"parent" : 23
+			},
+			{
+				"command" : 7,
+				"file" : 10,
+				"line" : 320,
 				"parent" : 24
 			},
 			{
 				"command" : 5,
 				"file" : 10,
+				"line" : 165,
+				"parent" : 25
+			},
+			{
+				"file" : 9,
+				"parent" : 26
+			},
+			{
+				"command" : 3,
+				"file" : 9,
+				"line" : 88,
+				"parent" : 27
+			},
+			{
+				"command" : 8,
+				"file" : 10,
+				"line" : 548,
+				"parent" : 23
+			},
+			{
+				"command" : 4,
+				"file" : 10,
 				"line" : 351,
-				"parent" : 30
+				"parent" : 29
 			},
 			{
 				"file" : 11,
+				"parent" : 30
+			},
+			{
+				"command" : 9,
+				"file" : 11,
+				"line" : 23,
 				"parent" : 31
+			},
+			{
+				"command" : 13,
+				"file" : 0,
+				"line" : 38,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 14,
+				"line" : 307,
+				"parent" : 33
+			},
+			{
+				"file" : 13,
+				"parent" : 34
+			},
+			{
+				"command" : 12,
+				"file" : 13,
+				"line" : 31,
+				"parent" : 35
+			},
+			{
+				"command" : 11,
+				"file" : 12,
+				"line" : 46,
+				"parent" : 36
+			},
+			{
+				"command" : 10,
+				"file" : 12,
+				"line" : 63,
+				"parent" : 37
+			},
+			{
+				"command" : 10,
+				"file" : 0,
+				"line" : 60,
+				"parent" : 0
 			},
 			{
 				"command" : 10,
 				"file" : 11,
-				"line" : 23,
-				"parent" : 32
-			},
-			{
-				"command" : 14,
-				"file" : 0,
-				"line" : 44,
-				"parent" : 0
-			},
-			{
-				"command" : 5,
-				"file" : 14,
-				"line" : 307,
-				"parent" : 34
-			},
-			{
-				"file" : 13,
-				"parent" : 35
-			},
-			{
-				"command" : 13,
-				"file" : 13,
-				"line" : 31,
-				"parent" : 36
-			},
-			{
-				"command" : 12,
-				"file" : 12,
-				"line" : 46,
-				"parent" : 37
-			},
-			{
-				"command" : 11,
-				"file" : 12,
-				"line" : 63,
-				"parent" : 38
-			},
-			{
-				"command" : 11,
-				"file" : 0,
-				"line" : 66,
-				"parent" : 0
-			},
-			{
-				"command" : 11,
-				"file" : 11,
 				"line" : 26,
-				"parent" : 32
+				"parent" : 31
 			}
 		]
 	},
@@ -299,86 +292,101 @@
 					"define" : "DISABLE_PNG"
 				},
 				{
-					"backtrace" : 17,
+					"backtrace" : 16,
 					"define" : "ROSCONSOLE_BACKEND_LOG4CXX"
 				},
 				{
-					"backtrace" : 21,
+					"backtrace" : 20,
 					"define" : "ROS_BUILD_SHARED_LIBS=1"
 				},
 				{
-					"backtrace" : 22,
+					"backtrace" : 21,
 					"define" : "ROS_PACKAGE_NAME=\"lio_sam\""
 				},
 				{
-					"backtrace" : 29,
+					"backtrace" : 28,
 					"define" : "qh_QHpointer"
 				},
 				{
-					"backtrace" : 33,
+					"backtrace" : 32,
 					"define" : "vtkRenderingContext2D_AUTOINIT=1(vtkRenderingContextOpenGL2)"
 				},
 				{
-					"backtrace" : 33,
+					"backtrace" : 32,
 					"define" : "vtkRenderingCore_AUTOINIT=3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)"
 				}
 			],
 			"includes" : 
 			[
 				{
-					"backtrace" : 39,
+					"backtrace" : 38,
 					"path" : "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/build/devel/include"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"path" : "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"path" : "/opt/ros/noetic/include"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"path" : "/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"path" : "/usr/local/lib/cmake/GTSAM/../../../include"
 				},
 				{
-					"backtrace" : 41,
+					"backtrace" : 40,
 					"isSystem" : true,
 					"path" : "/usr/include/vtk-7.1"
 				},
 				{
-					"backtrace" : 41,
+					"backtrace" : 40,
 					"isSystem" : true,
 					"path" : "/usr/include/freetype2"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"isSystem" : true,
 					"path" : "/usr/include/opencv4"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"isSystem" : true,
 					"path" : "/usr/include/eigen3"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"isSystem" : true,
 					"path" : "/usr/include/pcl-1.10"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"isSystem" : true,
 					"path" : "/usr/include/ni"
 				},
 				{
-					"backtrace" : 40,
+					"backtrace" : 39,
 					"isSystem" : true,
 					"path" : "/usr/include/openni2"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "/usr/local/include/gtsam/3rdparty/metis"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "/usr/local/include/gtsam/3rdparty/SuiteSparse_config"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "/usr/local/include/gtsam/3rdparty/CCOLAMD"
 				}
 			],
 			"language" : "CXX",
@@ -388,238 +396,7 @@
 			]
 		}
 	],
-	"dependencies" : 
-	[
-		{
-			"backtrace" : 4,
-			"id" : "lio_sam_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "rosgraph_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "roscpp_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "roscpp_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "std_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "std_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "geometry_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "std_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf2_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "roscpp_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "geometry_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf2_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "sensor_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "roscpp_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "geometry_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "roscpp_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "_catkin_empty_exported_target::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "std_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "rosgraph_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "rosgraph_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "rosgraph_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "nav_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "geometry_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "nav_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "geometry_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf2_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "nav_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "sensor_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "pcl_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "sensor_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "sensor_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "sensor_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "rosgraph_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_msgs_generate_messages_cpp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "std_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "actionlib_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "nav_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf2_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "tf2_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "pcl_msgs_generate_messages_eus::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "pcl_msgs_generate_messages_nodejs::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "pcl_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "pcl_msgs_generate_messages_py::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "nav_msgs_generate_messages_lisp::@6890427a1f51a3e7e1df"
-		}
-	],
-	"id" : "lio_sam_featureExtraction::@6890427a1f51a3e7e1df",
+	"id" : "lio_sam_imuPreintegration::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -638,7 +415,12 @@
 				"role" : "libraryPath"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include:/opt/ros/noetic/lib",
+				"fragment" : "-Wl,-rpath,/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/include:/opt/ros/noetic/lib:/usr/local/lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_timer.so",
 				"role" : "libraries"
 			},
 			{
@@ -1516,6 +1298,11 @@
 				"role" : "libraries"
 			},
 			{
+				"backtrace" : 3,
+				"fragment" : "/usr/local/lib/libgtsam.so.4.0.3",
+				"role" : "libraries"
+			},
+			{
 				"fragment" : "-lboost_system",
 				"role" : "libraries"
 			},
@@ -2289,12 +2076,69 @@
 				"backtrace" : 3,
 				"fragment" : "/usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2.0",
 				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_timer.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_serialization.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_system.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_filesystem.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_thread.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_chrono.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_atomic.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lpthread",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_date_time.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_regex.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-ltbb",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-ltbbmalloc",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/local/lib/libmetis-gtsam.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lm",
+				"role" : "libraries"
 			}
 		],
 		"language" : "CXX"
 	},
-	"name" : "lio_sam_featureExtraction",
-	"nameOnDisk" : "lio_sam_featureExtraction",
+	"name" : "lio_sam_imuPreintegration",
+	"nameOnDisk" : "lio_sam_imuPreintegration",
 	"paths" : 
 	{
 		"build" : ".",
@@ -2315,7 +2159,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/featureExtraction.cpp",
+			"path" : "src/imuPreintegration.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

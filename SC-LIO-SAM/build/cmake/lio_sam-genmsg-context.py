@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.context.in
 
-messages_str = "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg;/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
+messages_str = "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
 services_str = ""
 pkg_name = "lio_sam"
 dependencies_str = "geometry_msgs;std_msgs;nav_msgs;sensor_msgs"

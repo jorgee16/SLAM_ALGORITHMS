@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.cmake.em
 
-message(STATUS "lio_sam: 2 messages, 0 services")
+message(STATUS "lio_sam: 1 messages, 0 services")
 
 set(MSG_I_FLAGS "-Ilio_sam:/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg;-Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg;-Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg;-Inav_msgs:/opt/ros/noetic/share/nav_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg;-Iactionlib_msgs:/opt/ros/noetic/share/actionlib_msgs/cmake/../msg")
 
@@ -19,7 +19,7 @@ add_custom_target(lio_sam_generate_messages ALL)
 
 get_filename_component(_filename "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg" NAME_WE)
 add_custom_target(_lio_sam_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "lio_sam" "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg" "sensor_msgs/PointCloud2:sensor_msgs/PointField:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "lio_sam" "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg" "sensor_msgs/PointField:std_msgs/Header:sensor_msgs/PointCloud2"
 )
 
 #
@@ -31,7 +31,7 @@ add_custom_target(_lio_sam_generate_messages_check_deps_${_filename}
 _generate_msg_cpp(lio_sam
   "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/lio_sam
 )
 
@@ -64,7 +64,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS lio_sam_generate_messages_cpp)
 _generate_msg_eus(lio_sam
   "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/lio_sam
 )
 
@@ -97,7 +97,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS lio_sam_generate_messages_eus)
 _generate_msg_lisp(lio_sam
   "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/lio_sam
 )
 
@@ -130,7 +130,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS lio_sam_generate_messages_lisp)
 _generate_msg_nodejs(lio_sam
   "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/lio_sam
 )
 
@@ -163,7 +163,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS lio_sam_generate_messages_nodejs)
 _generate_msg_py(lio_sam
   "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM/msg/cloud_info.msg"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointField.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/sensor_msgs/cmake/../msg/PointCloud2.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/lio_sam
 )
 
