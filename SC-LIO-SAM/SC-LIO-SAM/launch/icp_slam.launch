@@ -34,15 +34,18 @@
     </node>
 
     <!-- ICP NODE -->
-    <node name="icp_registration_node" pkg="icp_registration_node" type="icp_registration_node" output="screen" />
+    <node pkg="$(arg project)" type="Reg_ICP" name="Reg_ICP" output="screen" />
     <!--- LOAM -->
     <!-- <include file="$(find lio_sam)/launch/include/module_loam.launch" /> -->
 
     <!--- Robot State TF -->
-    <include file="$(find lio_sam)/launch/include/module_robot_state_publisher.launch" />
+    <!-- <include file="$(find lio_sam)/launch/include/module_robot_state_publisher.launch" /> -->
 
     <!--- Run Rviz-->
     <!-- <include file="$(find lio_sam)/launch/include/module_rviz.launch" /> -->
+    <!--- Run Rviz-->
+    <node pkg="rviz" type="rviz" name="rviz" />
+
 
     <!-- <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/> -->
 

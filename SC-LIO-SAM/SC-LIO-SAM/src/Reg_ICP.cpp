@@ -79,8 +79,10 @@ private:
 public:
     ICPRegistration(): 
         T_map_to_odom_(Eigen::Isometry3d::Identity()),
+        odom_inited_(false),
         num_clouds_skip_(0),
         voxel_leaf_size_(0.2),
+       
         map_octree_(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(0.5))
     {
         allocateMemory();
@@ -108,9 +110,9 @@ public:
 
     void advertisePublishers(){
         // ICP topics
-        icp_odom_pub_ = nh.advertise<nav_msgs::Odometry>("icp_odometer/odom", 1, true);
-        icp_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("icp_odometer/pose", 1, true);
-        icp_odom_path_pub_ = nh.advertise<nav_msgs::Path>("icp_odometer/path", 1, true);
+        icp_odom_pub_ = nh.advertise<nav_msgs::Odometry>("icp_odometer/odom", 1);
+        icp_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("icp_odometer/pose", 1);
+        icp_odom_path_pub_ = nh.advertise<nav_msgs::Path>("icp_odometer/path", 1);
 
         // ICP odometry debug topics
 
@@ -118,14 +120,14 @@ public:
         aligned_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("icp_odometer/aligned_cloud", 1);
 
         // Map topics
-        map_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("octree_mapper/map_cloud", 1, true);
+        map_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("octree_mapper/map_cloud", 1);
         nn_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("octree_mapper/nn_cloud", 1);
         registered_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("octree_mapper/registered_cloud", 1);
-        refined_path_pub_ = nh.advertise<nav_msgs::Path>("octree_mapper/refined_path", 1, true);
+        refined_path_pub_ = nh.advertise<nav_msgs::Path>("octree_mapper/refined_path", 1);
     }
 
     void registerSubscribers(){
-        laser_cloud_sub_ = nh.subscribe("points_raw", 5, &ICPRegistration::laserCloudCallback, this);
+        laser_cloud_sub_ = nh.subscribe("points_raw", 1, &ICPRegistration::laserCloudCallback, this);
     }
 
     bool isOdomReady() const {
@@ -242,7 +244,7 @@ public:
         transformCloudToPoseFrame(cloud, raw_pose, cloud_in_map);
 
         if (map_cloud_->points.size() == 0) {
-            ROS_WARN("IcpSlam: Octree map is empty!");
+            // ROS_WARN("IcpSlam: Octree map is empty!");
             addPointsToMap(cloud_in_map);
             return false;
         }
@@ -390,15 +392,19 @@ public:
         prev_icp_odom_pose = Pose6DOF::getIdentity();
         prev_icp_pose = prev_icp_odom_pose;
 
-        ros::Time latest_stamp = ros::Time::now();
+        // ros::Time latest_stamp = ros::Time::now();
+        
+        ROS_INFO("Initial pose");
+        setInitialPose(Pose6DOF::getIdentity());
 
-        // ROS_INFO("Initial pose");
-        // icp.setInitialPose(Pose6DOF::getIdentity());
+
 
         while (ros::ok()) {
-            publishMapToOdomTf(latest_stamp);
+            // std::cout << "Entrei no ROS::OK" << std::endl;
+            // publishMapToOdomTf(latest_stamp);
             
             if (isOdomReady()) {
+                std::cout << "Tenho ODOM" << std::endl;
                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
                 getEstimates(latest_stamp, cloud, icp_transform, icp_odom_pose, new_transform_icp);
 
@@ -406,10 +412,10 @@ public:
 
                 if (new_transform_icp) {
                     Pose6DOF refined_transform;
-                    ROS_DEBUG("Transform refinement using nearest neighbor search");
+                    ROS_INFO("Transform refinement using nearest neighbor search");
                     bool registration_success = refineTransformAndGrowMap(latest_stamp, cloud, prev_icp_odom_pose, refined_transform);
                     if (registration_success) {
-                        ROS_DEBUG("Refinement successful");
+                        ROS_INFO("Refinement successful");
                         icp_transform = refined_transform;
                     }
                     icp_odom_pose = prev_icp_odom_pose + icp_transform;
@@ -417,9 +423,6 @@ public:
                 }
 
                 prev_icp_odom_pose = icp_odom_pose;
-            }
-            else {
-                setInitialPose(Pose6DOF::getIdentity());
             }
 
             iter++;
@@ -435,16 +438,17 @@ public:
     //         T_map_to_odom_ = Eigen::Isometry3d::Identity();
     //     }
     // }
-    void publishMapToOdomTf(const ros::Time& stamp) {
-        geometry_msgs::TransformStamped map_to_odom_tf =
-            getTfStampedFromEigenMatrix(ros::Time::now(), T_map_to_odom_.matrix().cast<float>(), "map", "odom");
-        tf_broadcaster.sendTransform(map_to_odom_tf);
-    }
+    // void publishMapToOdomTf(const ros::Time& stamp) {
+    //     geometry_msgs::TransformStamped map_to_odom_tf =
+    //         getTfStampedFromEigenMatrix(ros::Time::now(), T_map_to_odom_.matrix().cast<float>(), "map", "odom");
+    //     tf_broadcaster.sendTransform(map_to_odom_tf);
+    // }
 };
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "icp_registration_node");
+    ROS_INFO("Starting ICP");
     ICPRegistration icp;
     icp.main_loop();   
 }
