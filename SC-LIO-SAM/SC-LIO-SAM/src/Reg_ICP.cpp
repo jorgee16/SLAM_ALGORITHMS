@@ -81,9 +81,8 @@ public:
         T_map_to_odom_(Eigen::Isometry3d::Identity()),
         odom_inited_(false),
         num_clouds_skip_(0),
-        voxel_leaf_size_(0.2),
-       
-        map_octree_(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(0.5))
+        voxel_leaf_size_(0.2)
+        // map_octree_(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(0.5))
     {
         allocateMemory();
         init();
@@ -97,6 +96,7 @@ public:
         curr_cloud_.reset(new pcl::PointCloud<pcl::PointXYZ>());
         map_cloud_.reset(new pcl::PointCloud<pcl::PointXYZ>());
         map_octree_.reset(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(0.5));
+        map_octree_->setInputCloud(map_cloud_);
     }
 
     void init() {
@@ -127,7 +127,7 @@ public:
     }
 
     void registerSubscribers(){
-        laser_cloud_sub_ = nh.subscribe("points_raw", 1, &ICPRegistration::laserCloudCallback, this);
+        laser_cloud_sub_ = nh.subscribe("points_raw", 5, &ICPRegistration::laserCloudCallback, this);
     }
 
     bool isOdomReady() const {
@@ -181,17 +181,23 @@ public:
     }
 
     void addPointsToMap(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud) {
+        
+        // *map_cloud_ += *input_cloud;
+        // map_octree_->setInputCloud(map_cloud_);
+        // map_octree_->addPointsFromInputCloud();
         for (size_t i = 0; i < input_cloud->points.size(); i++) {
-            pcl::PointXYZ point = input_cloud->points[i];
+            pcl::PointXYZ point  = input_cloud->points[i];
             if (!map_octree_->isVoxelOccupiedAtPoint(point)) {
+                ROS_INFO("ANTES");
                 map_octree_->addPointToCloud(point, map_cloud_);
+                ROS_INFO("DEPOIS");
             }
         }
     }
 
     bool approxNearestNeighbors(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr& nearest_neighbors) {
         nearest_neighbors->points.clear();
-
+        ROS_INFO("CHEGUEI AQUI");
         // Iterate over points in the input point cloud, finding the nearest neighbor
         // for every point and storing it in the output array.
         for (size_t ii = 0; ii < cloud->points.size(); ++ii) {
@@ -231,8 +237,8 @@ public:
         Eigen::Matrix4d T = icp.getFinalTransformation().cast<double>();
 
         if (icp.hasConverged()) {
-            ROS_WARN("ICP converged");
-            transform = Pose6DOF(T, ros::Time().now());
+            ROS_INFO("ICP converged");
+            transform = Pose6DOF(T, latest_stamp);
             return true;
         }
 
@@ -245,6 +251,7 @@ public:
 
         if (map_cloud_->points.size() == 0) {
             // ROS_WARN("IcpSlam: Octree map is empty!");
+            ROS_INFO("CHEGUEI AQUI");
             addPointsToMap(cloud_in_map);
             return false;
         }
@@ -256,26 +263,33 @@ public:
         approxNearestNeighbors(cloud_in_map, nn_cloud_in_map);
         transformCloudToPoseFrame(nn_cloud_in_map, raw_pose.inverse(), nn_cloud);
 
-        if (nn_cloud_pub_.getNumSubscribers() > 0) {
-            publishPointCloud(nn_cloud, "base_link", stamp, &nn_cloud_pub_);
-        }
-
+        publishPointCloud(nn_cloud, "base_link", stamp, &nn_cloud_pub_);
+        // if (nn_cloud_pub_.getNumSubscribers() > 0) {
+        //     publishPointCloud(nn_cloud, "base_link", stamp, &nn_cloud_pub_);
+        // }
+        publishPointCloud(map_cloud_, "map", stamp, &map_cloud_pub_);
+        publishPointCloud(cloud_in_map, "map", stamp, &registered_cloud_pub_);
+        
         if (estimateTransformICP(cloud, nn_cloud, transform)) {
             Pose6DOF refined_pose = raw_pose + transform;
             transformCloudToPoseFrame(cloud, refined_pose, cloud_in_map);
             addPointsToMap(cloud_in_map);
-
-            if (map_cloud_pub_.getNumSubscribers() > 0) {
-            publishPointCloud(map_cloud_, "map", stamp, &map_cloud_pub_);
-            }
-            if (refined_path_pub_.getNumSubscribers() > 0) {
+            
+            // publishPointCloud(map_cloud_, "map", stamp, &map_cloud_pub_);
             publishPath(refined_pose);
-            }
-            if (registered_cloud_pub_.getNumSubscribers() > 0) {
-            publishPointCloud(cloud_in_map, "map", stamp, &registered_cloud_pub_);
-            }
+            
+            // if (map_cloud_pub_.getNumSubscribers() > 0) {
+            // publishPointCloud(map_cloud_, "map", stamp, &map_cloud_pub_);
+            // }
+            // if (refined_path_pub_.getNumSubscribers() > 0) {
+            // publishPath(refined_pose);
+            // }
+            // if (registered_cloud_pub_.getNumSubscribers() > 0) {
+            // publishPointCloud(cloud_in_map, "map", stamp, &registered_cloud_pub_);
+            // }
             return true;
         }
+       
 
         return false;
     }
@@ -301,17 +315,20 @@ public:
         {
             new_transform_ = true;
             icp_odom_poses_.push_back(new_pose);
-            insertPoseInPath(new_pose.toROSPose(), "map", stamp, icp_odom_path_);
+            insertPoseInPath(new_pose.toROSPose(), "odom", stamp, icp_odom_path_);
 
-            if (icp_odom_pub_.getNumSubscribers() > 0) {
-            publishOdometry(new_pose.pos, new_pose.rot, "map", "odom", stamp, &icp_odom_pub_);
-            }
-            if (icp_pose_pub_.getNumSubscribers() > 0) {
-            publishPoseStamped(new_pose.pos, new_pose.rot, "map", stamp, &icp_pose_pub_);
-            }
-            if (icp_odom_path_pub_.getNumSubscribers() > 0) {
+            publishOdometry(new_pose.pos, new_pose.rot, "odom", "base_link", stamp, &icp_odom_pub_);
+            publishPoseStamped(new_pose.pos, new_pose.rot, "odom", stamp, &icp_pose_pub_);
             publishPath(stamp);
-            }
+            // if (icp_odom_pub_.getNumSubscribers() > 0) {
+            // publishOdometry(new_pose.pos, new_pose.rot, "odom", "base_link", stamp, &icp_odom_pub_);
+            // }
+            // if (icp_pose_pub_.getNumSubscribers() > 0) {
+            // publishPoseStamped(new_pose.pos, new_pose.rot, "odom", stamp, &icp_pose_pub_);
+            // }
+            // if (icp_odom_path_pub_.getNumSubscribers() > 0) {
+            // publishPath(stamp);
+            // }
 
             return true;
         }
@@ -359,23 +376,25 @@ public:
         Eigen::Matrix4d T = icp.getFinalTransformation().cast<double>();
 
         if (icp.hasConverged() && icp.getFitnessScore() < 10) {
-            ROS_WARN("ICP odometer converged");
+            ROS_INFO("ICP odometry converged");
             std::cout << "Estimated T:\n" << T << std::endl;
             
             Eigen::Matrix4d T_inv = T.inverse();
             pcl::transformPointCloud(*prev_cloud_, *prev_cloud_in_curr_frame, T_inv);
             bool success = updateICPOdometry(latest_stamp, T);
             if (success) {
-            odom_inited_ = true;
-            *prev_cloud_ = *curr_cloud_;
+                odom_inited_ = true;
+                *prev_cloud_ = *curr_cloud_;
             }
 
-            if (prev_cloud_pub_.getNumSubscribers() > 0) {
-                publishPointCloud(prev_cloud_, cloud_msg->header.frame_id, latest_stamp, &prev_cloud_pub_);
-            }
-            if (aligned_cloud_pub_.getNumSubscribers() > 0) {
-                publishPointCloud(curr_cloud_in_prev_frame, cloud_msg->header.frame_id, latest_stamp, &aligned_cloud_pub_);
-            }
+            publishPointCloud(prev_cloud_, "base_link", latest_stamp, &prev_cloud_pub_);
+            publishPointCloud(curr_cloud_in_prev_frame, "base_link", latest_stamp, &aligned_cloud_pub_);
+            // if (prev_cloud_pub_.getNumSubscribers() > 0) {
+            //     publishPointCloud(prev_cloud_, "base_link", latest_stamp, &prev_cloud_pub_);
+            // }
+            // if (aligned_cloud_pub_.getNumSubscribers() > 0) {
+            //     publishPointCloud(curr_cloud_in_prev_frame, "base_link", latest_stamp, &aligned_cloud_pub_);
+            // }
         }
     }
     
@@ -401,7 +420,7 @@ public:
 
         while (ros::ok()) {
             // std::cout << "Entrei no ROS::OK" << std::endl;
-            // publishMapToOdomTf(latest_stamp);
+            publishMapToOdomTf(latest_stamp);
             
             if (isOdomReady()) {
                 std::cout << "Tenho ODOM" << std::endl;
@@ -411,6 +430,7 @@ public:
             //     std::cout << "ICP Tranform: " << icp_transform << std::endl;
 
                 if (new_transform_icp) {
+                     std::cout << "Tenho ICP Transform" << std::endl;
                     Pose6DOF refined_transform;
                     ROS_INFO("Transform refinement using nearest neighbor search");
                     bool registration_success = refineTransformAndGrowMap(latest_stamp, cloud, prev_icp_odom_pose, refined_transform);
@@ -438,11 +458,11 @@ public:
     //         T_map_to_odom_ = Eigen::Isometry3d::Identity();
     //     }
     // }
-    // void publishMapToOdomTf(const ros::Time& stamp) {
-    //     geometry_msgs::TransformStamped map_to_odom_tf =
-    //         getTfStampedFromEigenMatrix(ros::Time::now(), T_map_to_odom_.matrix().cast<float>(), "map", "odom");
-    //     tf_broadcaster.sendTransform(map_to_odom_tf);
-    // }
+    void publishMapToOdomTf(const ros::Time& stamp) {
+        geometry_msgs::TransformStamped map_to_odom_tf =
+            getTfStampedFromEigenMatrix(stamp, T_map_to_odom_.matrix().cast<float>(), "map", "odom");
+        tf_broadcaster.sendTransform(map_to_odom_tf);
+    }
 };
 
 int main(int argc, char **argv)
