@@ -14,6 +14,7 @@
 
 class Pose6DOF {
  private:
+ 
   const double EQUALITY_THRESH = 1e-10;
 
  public:

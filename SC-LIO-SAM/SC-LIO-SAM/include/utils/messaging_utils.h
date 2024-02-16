@@ -29,4 +29,4 @@ void publishPoseStamped(
     ros::Publisher* pub_ptr);
 
 void publishPointCloud(
-    const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, const std::string& frame_id, const ros::Time& stamp, ros::Publisher* pub_ptr);
+    const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud, const std::string& frame_id, const ros::Time& stamp, ros::Publisher* pub_ptr);

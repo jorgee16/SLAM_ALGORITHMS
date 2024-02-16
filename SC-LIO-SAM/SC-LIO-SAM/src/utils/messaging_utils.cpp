@@ -68,7 +68,7 @@ void publishPoseStamped(
 }
 
 void publishPointCloud(
-    const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, const std::string& frame_id, const ros::Time& stamp, ros::Publisher* pub_ptr) {
+    const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud, const std::string& frame_id, const ros::Time& stamp, ros::Publisher* pub_ptr) {
   sensor_msgs::PointCloud2 cloud_msg;
   pcl::toROSMsg(*cloud, cloud_msg);
   cloud_msg.header.stamp = stamp;
