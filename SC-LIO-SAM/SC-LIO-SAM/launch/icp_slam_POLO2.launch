@@ -5,30 +5,29 @@
     <!-- Bag com IMU a 200HZ POLO 2 SEQUENCIA 2 -->
     <arg name='bag' value="/home/joaojorge/POLO2_SEQ2/POLO2_SEQ02_new.bag"/>
 
-    <!-- GEORGIA TECH DATASET -->
-    <!-- <arg name='bag' value="/home/joaojorge/orchard_new.bag"/> -->
-
     <!-- *******************  SIM TIME *********************** -->
     <param name="/use_sim_time" value="true" />
 
     <!-- Parameters -->
     <rosparam file="$(find lio_sam)/config/params_POLO2.yaml" command="load" />
 
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 0.5 $(arg bag)" required="true">
         <remap from="/imu/data" to="/imu_raw" />
         <remap from="/ouster/points" to="/points_raw" />
 
     </node>
 
+    <!-- ICP NODE -->
+    <node pkg="$(arg project)" type="Reg_ICP" name="Reg_ICP" output="screen" />
     <!--- LOAM -->
-    <include file="$(find lio_sam)/launch/include/module_loam.launch" />
+    <!-- <include file="$(find lio_sam)/launch/include/module_loam.launch" /> -->
 
     <!--- Robot State TF -->
     <include file="$(find lio_sam)/launch/include/module_POLO2_state_publisher.launch" />
 
     <!--- Run Rviz-->
-    <include file="$(find lio_sam)/launch/include/module_rviz.launch" />
+    <node pkg="rviz" type="rviz" name="$(arg project)_rviz" args="-d $(find lio_sam)/launch/include/config/ICP_slam.rviz" />
 
-    <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/>
+    <!-- <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/> -->
 
 </launch>

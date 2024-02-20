@@ -10,6 +10,8 @@ Panels:
         - /PointCloud23
         - /PointCloud24
         - /PointCloud25
+        - /TF1
+        - /PointCloud26
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -41,7 +43,7 @@ Visualization Manager:
       Cell Size: 1
       Class: rviz/Grid
       Color: 160; 160; 164
-      Enabled: true
+      Enabled: false
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -54,7 +56,7 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -142,8 +144,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 18.071834564208984
-        Min Value: -6.696776866912842
+        Max Value: 21.716367721557617
+        Min Value: -11.927286148071289
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -159,9 +161,9 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 1
       Selectable: true
-      Size (Pixels): 3
+      Size (Pixels): 1
       Size (m): 0.10000000149011612
-      Style: Flat Squares
+      Style: Squares
       Topic: /icp_odometry/map_cloud
       Unreliable: false
       Use Fixed Frame: true
@@ -170,14 +172,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
+        Max Value: 11.110727310180664
+        Min Value: -11.800918579101562
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: AxisColor
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -185,12 +187,12 @@ Visualization Manager:
       Min Color: 0; 0; 0
       Name: PointCloud2
       Position Transformer: XYZ
-      Queue Size: 10
+      Queue Size: 2
       Selectable: true
-      Size (Pixels): 3
+      Size (Pixels): 2
       Size (m): 0.10000000149011612
-      Style: Flat Squares
-      Topic: /icp_odometry/cloud_registered_raw
+      Style: Points
+      Topic: /icp_odometry/cloud_registered
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -204,11 +206,15 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
+        chassi_link:
+          Value: true
+        gps:
+          Value: true
         imu_link:
           Value: true
         odom:
           Value: true
-        velo_link:
+        os_sensor:
           Value: true
       Marker Alpha: 1
       Marker Scale: 1
@@ -219,11 +225,44 @@ Visualization Manager:
       Tree:
         odom:
           base_link:
+            chassi_link:
+              {}
+            gps:
+              {}
             imu_link:
-              velo_link:
-                {}
+              {}
+            os_sensor:
+              {}
       Update Interval: 0
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10.45606517791748
+        Min Value: -4.497360706329346
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 1
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /icp_odometry/cloud_registered_raw
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -252,7 +291,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 243.79066467285156
+      Distance: 99.49179077148438
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -260,17 +299,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 72.50369262695312
-        Y: 10.458247184753418
-        Z: -24.709585189819336
+        X: 1.8143069744110107
+        Y: -4.617938995361328
+        Z: 0.8449563980102539
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 0.6147972345352173
       Target Frame: <Fixed Frame>
-      Yaw: 4.655439853668213
+      Yaw: 5.055398941040039
     Saved: ~
 Window Geometry:
   Displays:

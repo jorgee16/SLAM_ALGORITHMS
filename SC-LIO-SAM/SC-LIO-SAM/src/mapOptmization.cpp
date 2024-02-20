@@ -589,9 +589,9 @@ public:
             rate.sleep();
             performRSLoopClosure();
             performSCLoopClosure(); // giseop
-            std::cout << "DEPOIS DO SC" << endl;
+            // std::cout << "DEPOIS DO SC" << endl;
             visualizeLoopClosure();
-            std::cout << "Visualizar loop closure" << endl;
+            // std::cout << "Visualizar loop closure" << endl;
         }
     }
 
