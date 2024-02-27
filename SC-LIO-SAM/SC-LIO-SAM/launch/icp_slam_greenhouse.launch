@@ -11,7 +11,7 @@
     <!-- Parameters -->
     <rosparam file="$(find lio_sam)/config/params_POLO2.yaml" command="load" />
 
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 1 $(arg bag)" required="true">
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 0.5 $(arg bag)" required="true">
         <remap from="/imu/data" to="/imu_raw" />
         <remap from="/ouster/points" to="/points_raw" />
 
@@ -23,7 +23,7 @@
     <!-- <include file="$(find lio_sam)/launch/include/module_loam.launch" /> -->
 
     <!--- Robot State TF -->
-    <include file="$(find lio_sam)/launch/include/module_POLO2_state_publisher.launch" />
+    <include file="$(find lio_sam)/launch/include/module_Greenhouse_state_publisher.launch" />
 
     <!--- Run Rviz-->
     <node pkg="rviz" type="rviz" name="$(arg project)_rviz" args="-d $(find lio_sam)/launch/include/config/ICP_slam.rviz" />

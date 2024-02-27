@@ -11,7 +11,7 @@
     <!-- Parameters -->
     <rosparam file="$(find lio_sam)/config/params_POLO2.yaml" command="load" />
 
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 0.5 $(arg bag)" required="true">
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 0.1 $(arg bag)" required="true">
         <remap from="/imu/data" to="/imu_raw" />
         <remap from="/ouster/points" to="/points_raw" />
 

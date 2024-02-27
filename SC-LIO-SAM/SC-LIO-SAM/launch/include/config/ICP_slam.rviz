@@ -9,9 +9,8 @@ Panels:
         - /PointCloud22
         - /PointCloud23
         - /PointCloud24
+        - /TF1/Frames1
         - /PointCloud25
-        - /TF1
-        - /PointCloud26
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -88,14 +87,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
+        Max Value: 28.5001220703125
+        Min Value: -7.988553047180176
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: AxisColor
       Decay Time: 0
       Enabled: false
       Invert Rainbow: false
@@ -107,8 +106,8 @@ Visualization Manager:
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.10000000149011612
-      Style: Flat Squares
-      Topic: /icp_odometry/prev_cloud
+      Style: Points
+      Topic: /icp_odometry/map_cloud_ICP
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -144,36 +143,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 21.716367721557617
-        Min Value: -11.927286148071289
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: AxisColor
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Min Color: 0; 0; 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 1
-      Selectable: true
-      Size (Pixels): 1
-      Size (m): 0.10000000149011612
-      Style: Squares
-      Topic: /icp_odometry/map_cloud
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 11.110727310180664
-        Min Value: -11.800918579101562
+        Max Value: 18.529348373413086
+        Min Value: -6.636590480804443
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -192,7 +163,7 @@ Visualization Manager:
       Size (Pixels): 2
       Size (m): 0.10000000149011612
       Style: Points
-      Topic: /icp_odometry/cloud_registered
+      Topic: /icp_odometry/map_cloud_ICP
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -203,15 +174,15 @@ Visualization Manager:
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         base_link:
           Value: true
         chassi_link:
-          Value: true
+          Value: false
         gps:
-          Value: true
+          Value: false
         imu_link:
-          Value: true
+          Value: false
         odom:
           Value: true
         os_sensor:
@@ -238,14 +209,42 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 10.45606517791748
-        Min Value: -4.497360706329346
+        Max Value: 18.529348373413086
+        Min Value: -6.636590480804443
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
       Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 2
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /icp_odometry/curr_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
       Decay Time: 0
       Enabled: false
       Invert Rainbow: false
@@ -255,9 +254,9 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 1
+      Size (Pixels): 3
       Size (m): 0.009999999776482582
-      Style: Points
+      Style: Flat Squares
       Topic: /icp_odometry/cloud_registered_raw
       Unreliable: false
       Use Fixed Frame: true
@@ -291,7 +290,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 99.49179077148438
+      Distance: 208.7559051513672
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -299,17 +298,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.8143069744110107
-        Y: -4.617938995361328
-        Z: 0.8449563980102539
+        X: 50.74386215209961
+        Y: -2.616844415664673
+        Z: -3.680558919906616
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6147972345352173
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 5.055398941040039
+      Yaw: 4.64040470123291
     Saved: ~
 Window Geometry:
   Displays:
