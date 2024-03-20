@@ -13,7 +13,7 @@
     <!-- <arg name='bag' value="/home/joaojorge/POLO2_SEQ2/POLO2_SEQ02_new.bag"/> -->
 
     <!-- GEORGIA TECH DATASET -->
-    <arg name='bag' value="/home/joaojorge/orchard.bag"/>
+    <arg name='bag' value="/home/joaojorge/orchard_GEORGIA_TECH_00.bag"/>
 
     <!-- Bag com IMU a 100 Hz SEQUENCIA 00 DO KITTI-->
     <!-- <arg name="bag" value="/home/joaojorge/Downloads/kitti_2011_10_03_drive_0027_100hz_IMU/kitti.bag"/> -->
@@ -55,10 +55,10 @@
     <include file="$(find lio_sam)/launch/include/module_loam.launch" />
 
     <!--- Robot State TF -->
-    <!-- <include file="$(find lio_sam)/launch/include/GEORGIA_module_state_publisher.launch" /> -->
+    <include file="$(find lio_sam)/launch/include/module_GEORGIA_state_publisher.launch" />
 
         <!--- TF -->
-    <node pkg="tf" type="static_transform_publisher" name="sbg_to_base_link"  args="0 0 0 0 0 0 /base_link    /sbg 10" />
+    <!--- <node pkg="tf" type="static_transform_publisher" name="sbg_to_base_link"  args="0 0 0 0 0 0 /base_link    /sbg 10" /> -->
     <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 -1.570795 -1.570795 0        /camera /base_link   10" /> -->
 
     <!--- Run Navsat -->
@@ -67,6 +67,6 @@
     <!--- Run Rviz-->
     <include file="$(find lio_sam)/launch/include/module_rviz.launch" />
 
-    <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/>
+     <!--- <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/>-->
 
 </launch>

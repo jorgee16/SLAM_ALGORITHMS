@@ -78,7 +78,8 @@
         "cfenv": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "*.ipp": "cpp"
     },
     "cmake.sourceDirectory": "/home/joaojorge/SLAM_ws/src/SC-LIO-SAM/SC-LIO-SAM"
 }

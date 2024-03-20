@@ -11,7 +11,7 @@
     <!-- Parameters -->
     <rosparam file="$(find lio_sam)/config/params_POLO2.yaml" command="load" />
 
-    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 0.01 $(arg bag)" required="true">
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock -r 0.03 $(arg bag)" required="true">
         <remap from="/imu/data" to="/imu_raw" />
         <remap from="/ouster/points" to="/points_raw" />
 
@@ -28,6 +28,6 @@
     <!--- Run Rviz-->
     <node pkg="rviz" type="rviz" name="$(arg project)_rviz" args="-d $(find lio_sam)/launch/include/config/ICP_slam.rviz" />
 
-    <!-- <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/> -->
+    <node pkg="lio_sam" type="save_path" name="save_path" output="screen"/>
 
 </launch>

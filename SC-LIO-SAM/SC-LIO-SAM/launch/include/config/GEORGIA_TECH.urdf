@@ -43,13 +43,13 @@
     </visual>
   </link>
 
-  <link name="sbg" />
+  <!-- <link name="sbg" />
 
   <joint name="imu_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="sbg" />
     <origin xyz="0 0 0" rpy="-3.137 0 0" />
-  </joint>
+  </joint> -->
   <!-- <joint name="base_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu_link" />
@@ -59,7 +59,7 @@
   <joint name="velo_base_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="os_sensor" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0.25 0 0.27" rpy="0 0 0" />
   </joint>
     <!-- <joint name="velo_link_joint" type="fixed">
     <parent link="sbg" />

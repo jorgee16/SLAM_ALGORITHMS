@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="(empty)"
+	BuildStamp="20240304-1111-Experimental"
+	Name="isrmeca"
+	Generator="ctest-3.16.3"
+	CompilerName="/usr/bin/g++"
+	CompilerVersion="9.4.0"
+	OSName="Linux"
+	Hostname="isrmeca"
+	OSRelease="5.15.0-97-generic"
+	OSVersion="#107~20.04.1-Ubuntu SMP Fri Feb 9 14:20:11 UTC 2024"
+	OSPlatform="x86_64"
+	Is64Bits="1"
+	VendorString="AuthenticAMD"
+	VendorID="Advanced Micro Devices"
+	FamilyID="23"
+	ModelID="113"
+	ProcessorCacheSize="512"
+	NumberOfLogicalCPU="16"
+	NumberOfPhysicalCPU="8"
+	TotalVirtualMemory="7628"
+	TotalPhysicalMemory="64220"
+	LogicalProcessorsPerPhysical="2"
+	ProcessorClockFrequency="2200"
+	>
+	<Testing>
+		<StartDateTime>Mar 04 11:11 WET</StartDateTime>
+		<StartTestTime>1709550700</StartTestTime>
+		<TestList/>
+		<EndDateTime>Mar 04 11:11 WET</EndDateTime>
+		<EndTestTime>1709550700</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>

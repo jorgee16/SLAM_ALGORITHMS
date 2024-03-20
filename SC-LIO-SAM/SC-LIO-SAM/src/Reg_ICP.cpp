@@ -45,9 +45,9 @@ private:
     
     // Constants
     const double ICP_FITNESS_THRESH = 0.1;
-    const double ICP_MAX_CORR_DIST = 2.0;
-    const double ICP_EPSILON = 1e-06;
-    const double ICP_MAX_ITERS = 20; // 10
+    const double ICP_MAX_CORR_DIST = 5.0;
+    const double ICP_EPSILON = 1e-6; //1e-6
+    const double ICP_MAX_ITERS = 10; // 10
 
     tf2_ros::TransformBroadcaster tf_broadcaster;
     Eigen::Isometry3d T_map_to_odom_;
@@ -55,26 +55,26 @@ private:
 
     // Mutex
     std::mutex mtx;
+
     // ROS node handle, URDF frames, topics and publishers
     ros::Publisher map_cloud_pub;
     ros::Publisher aligned_cloud_pub_;
     ros::Publisher curr_cloud_pub_;
+    ros::Publisher prev_cloud_pub_;
     ros::Publisher icp_odom_pub_;
     ros::Publisher icp_pose_pub_;
     ros::Publisher icp_odom_path_pub_;
     
+    // Subscriber ouster pcd's
     ros::Subscriber laser_cloud_sub_;
-    // ros::Subscriber subCloudRegisteredRaw;
-    // Publish map cloud and path refined
-
+    
+    // Publishers for map cloud, registered clouds and path refined
     ros::Publisher map_cloud_pub_;
     ros::Publisher nn_cloud_pub_;
     ros::Publisher registered_cloud_pub_;
     // ros::Publisher refined_path_pub_;
 
     ros::Publisher pubHistoryKeyFrames;
-    // ros::Publisher register_cloud_pub2;
-
     ros::Publisher pubCloudRegisteredDS;
     ros::Publisher pubCloudRegisteredRaw;
     
@@ -96,7 +96,7 @@ private:
     int clouds_skipped_;
     int num_clouds_skip_;
     double voxel_leaf_size_;
-
+    int iter;
     // Transforms and intermediate poses
     ros::Time latest_stamp;
     Pose6DOF icp_latest_transform_;
@@ -104,30 +104,27 @@ private:
     std::vector<Pose6DOF> icp_odom_poses_;
     // std::vector<Pose6DOF> refined_poses;
     
-    // PCL clouds
+    // PCL clouds for ICP
     pcl::PointCloud<PointType>::Ptr prev_cloud_;
     pcl::PointCloud<PointType>::Ptr curr_cloud_;
     pcl::PointCloud<PointType>::Ptr raw_cloud;
 
-    pcl::PointCloud<PointType>::Ptr curKeyframeCloud;
-    pcl::PointCloud<PointType>::Ptr nearKeyframeCloud;
+    // pcl::PointCloud<PointType>::Ptr curKeyframeCloud;
+    // pcl::PointCloud<PointType>::Ptr nearKeyframeCloud;
     pcl::PointCloud<PointType>::Ptr curr_cloud_in_prev_frame;
 
     pcl::PointCloud<PointType>::Ptr cloudKeyPoses3D;
     pcl::PointCloud<PointTypePose>::Ptr cloudKeyPoses6D;
-    pcl::PointCloud<PointTypePose>::Ptr copy_cloudKeyPoses6D;
-    pcl::PointCloud<PointType>::Ptr copy_cloudKeyPoses3D;
 
-
+    // Parameters for voxelization
     pcl::VoxelGrid<PointType> downSizeFilterICP;
-
-    // pcl::PointCloud<PointType>::Ptr laserCloudLastDS;
+    pcl::VoxelGrid<PointType> downSizeFilterMap;
 
     // PCL clouds for mapping
     pcl::PointCloud<PointType>::Ptr map_cloud_;
-    // pcl::octree::OctreePointCloudSearch<PointType>::Ptr map_octree_;
 
     vector<pcl::PointCloud<PointType>::Ptr> CloudKeyFrames;
+    
 
 public:
     ICPRegistration(): 
@@ -136,8 +133,10 @@ public:
         initialize(false),
         num_clouds_skip_(0),
         voxel_leaf_size_(0.1),
+        iter(0),
+        icp_latest_transform_(Pose6DOF::getIdentity()),
         prev_icp_odom(Pose6DOF::getIdentity())
-        // map_octree_(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(0.5))
+        
     {
         allocateMemory();
         init();
@@ -149,16 +148,13 @@ public:
     {   
         cloudKeyPoses3D.reset(new pcl::PointCloud<PointType>());
         cloudKeyPoses6D.reset(new pcl::PointCloud<PointTypePose>());
-        copy_cloudKeyPoses6D.reset(new pcl::PointCloud<PointTypePose>());
-        copy_cloudKeyPoses3D.reset(new pcl::PointCloud<PointType>());
+        // copy_cloudKeyPoses6D.reset(new pcl::PointCloud<PointTypePose>());
+        // copy_cloudKeyPoses3D.reset(new pcl::PointCloud<PointType>());
 
         prev_cloud_.reset(new pcl::PointCloud<PointType>());
         curr_cloud_.reset(new pcl::PointCloud<PointType>());
         map_cloud_.reset(new pcl::PointCloud<PointType>());
         raw_cloud.reset(new pcl::PointCloud<PointType>());
-        
-        // map_octree_.reset(new pcl::octree::OctreePointCloudSearch<PointType>(0.5));
-        // map_octree_->setInputCloud(map_cloud_);
     }
 
     void init() {
@@ -184,6 +180,7 @@ public:
         map_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("icp_odometry/map_cloud_ICP", 1);
         aligned_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("icp_odometry/aligned_cloud", 1);
         curr_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("icp_odometry/curr_cloud", 1);
+        prev_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("icp_odometry/prev_cloud", 1);
 
         // Map topics
 
@@ -199,7 +196,6 @@ public:
 
     void registerSubscribers(){
         laser_cloud_sub_ = nh.subscribe("points_raw", 5, &ICPRegistration::laserCloudCallback, this);
-        // subCloudRegisteredRaw = nh.subscribe("icp_odometry/cloud_registered_raw",1);
     }
 
     bool isOdomReady() const {
@@ -221,7 +217,7 @@ public:
     }
 
     void getEstimates(ros::Time& stamp, pcl::PointCloud<PointType>::Ptr& cloud, Pose6DOF& latest_icp_transform, Pose6DOF& icp_pose, bool& new_transform) {
-        cloud = prev_cloud_;
+        cloud = curr_cloud_;
         
         // cloud = map_cloud_;
 
@@ -285,7 +281,7 @@ public:
     {
         geometry_msgs::PoseStamped pose_stamped;
         pose_stamped.header.stamp = ros::Time().fromSec(pose_in.time);
-        pose_stamped.header.frame_id = odometryFrame;
+        pose_stamped.header.frame_id = "odom";
         pose_stamped.pose.position.x = pose_in.x;
         pose_stamped.pose.position.y = pose_in.y;
         pose_stamped.pose.position.z = pose_in.z;
@@ -298,7 +294,7 @@ public:
         globalPath.poses.push_back(pose_stamped);
     }
 
-    void addPointsToMap(pcl::PointCloud<PointType>::Ptr input_cloud) {
+    void addPointsToMap(pcl::PointCloud<PointType>::Ptr &input_cloud) {
         // Concatenate the input_cloud with the map_cloud
         *map_cloud_ += *input_cloud;
 
@@ -309,26 +305,75 @@ public:
         voxel_grid_filter.setLeafSize(0.2, 0.2, 0.2); // Adjust the leaf size as needed
         voxel_grid_filter.filter(*merged_cloud);
 
-        // Optionally, you can further apply other filters to remove outliers or downsample the merged cloud
-
         // Update the map_cloud_ with the filtered merged cloud
         map_cloud_ = merged_cloud;
     }
 
-    void performICP(ros::Time& stamp){
+    void performMapICP(const ros::Time& stamp, const pcl::PointCloud<PointType>::Ptr& cloud, Pose6DOF& prev_pose, Pose6DOF & transform) {
+        
+        pcl::PointCloud<PointType>::Ptr cloud_in_map(new pcl::PointCloud<PointType>());
+        // Pose6DOF transform;
+        // Pose6DOF prev_pose = getLatestPose();
+
+        transformCloudToPoseFrame(cloud, prev_pose, cloud_in_map);
+        
+        if (map_cloud_->points.size() == 0) {
+            // ROS_INFO("CHEGUEI AQUI");
+            addPointsToMap(cloud_in_map);
+
+            return;
+        }
+        
+        std::lock_guard<std::mutex> lock(mtx);
+
+        pcl::GeneralizedIterativeClosestPoint<PointType, PointType> icp;
+        icp.setMaximumIterations(100);
+        icp.setTransformationEpsilon(ICP_EPSILON);
+        icp.setMaxCorrespondenceDistance(150);
+        icp.setRANSACIterations(0);
+        icp.setInputSource(cloud_in_map);
+        icp.setInputTarget(map_cloud_);
+
+        pcl::PointCloud<PointType>::Ptr prev_cloud_in_curr_frame(new pcl::PointCloud<PointType>()),
+            curr_cloud_in_prev_frame(new pcl::PointCloud<PointType>()), joint_cloud(new pcl::PointCloud<PointType>());
+        icp.align(*curr_cloud_in_prev_frame);
+        Eigen::Matrix4d T = icp.getFinalTransformation().cast<double>();
+
+        std::cout << "MAP ICP FITNESS SCORE : " << icp.getFitnessScore() << std::endl;
+
+        if (icp.hasConverged() && icp.getFitnessScore() < 0.1) {
+            ROS_INFO("ICP converged");
+        
+            bool success = updateICPOdometry(latest_stamp, T);
+            if (success) {
+                odom_inited_ = true;
+                *prev_cloud_ = *curr_cloud_;
+            }
+            
+            transform = Pose6DOF(T, latest_stamp);
+
+            if (registered_cloud_pub_.getNumSubscribers() > 0) {
+                publishPointCloud(cloud_in_map, "odom", stamp, &registered_cloud_pub_);
+            }
+
+            if (map_cloud_pub.getNumSubscribers() != 0){
+                publishPointCloud(map_cloud_, "odom", stamp, &map_cloud_pub);
+            }
+        }
+        
+        Pose6DOF new_pose = prev_pose + transform;
+            
+        std::cout << "ICP odometry refined pose = " << new_pose.toStringQuat("   ");
+        std::cout << "Cloud transform = " << transform.toStringQuat("   ");
+
+        transformCloudToPoseFrame(prev_cloud_, new_pose, cloud_in_map);
+        addPointsToMap(cloud_in_map);
+    }
+
+    void performICP(const ros::Time& stamp, Pose6DOF& pose){
 
         std::cout << " Perform ICP" << std::endl;
         std::cout << "STAMP FOR COARSE ICP: " << latest_stamp << std::endl;
-        // if (prev_cloud_->points.size() == 0) {
-        //     // *map_cloud_ = *curr_cloud_;
-        //     *prev_cloud_ = *curr_cloud_;
-        //     return;
-        // }
-        
-        // Pose6DOF pose = getLatestPose();
-        // std::cout <<"POSE X: " << pose.pos(0);
-        // std::cout <<"POSE Y: " << pose.pos(1);
-        // std::cout <<"POSE Z: " << pose.pos(2);
 
         std::lock_guard<std::mutex> lock(mtx);
         
@@ -345,32 +390,39 @@ public:
 
         icp.align(*aligned_cloud);
         Eigen::Matrix4d T = icp.getFinalTransformation().cast<double>();
+        
 
         std::cout << "ICP FITNESS SCORE: " << icp.getFitnessScore() << std::endl;
 
         if (icp.hasConverged() && icp.getFitnessScore() < 3) { // fitness score a 3 funciona bem (dentro do possivel) com bag rate 0.5
             ROS_INFO("ICP odometry converged");
             // std::cout << "ICP Fitness score: " << icp.getFitnessScore() << std::endl;
-            // std::cout << "Estimated T:\n" << T << std::endl;
+            // std::cout << "Estimated T:\n" << T << std::endl;v
 
-            bool success = updateICPOdometry(stamp, T);
-            if (success) {
-                odom_inited_ = true;
-                *prev_cloud_ = *curr_cloud_;
-                // *map_cloud_ = *aligned_cloud;
-                // cloudforICP();
-                // *map_cloud_ = *curr_cloud_;
-            }
+            // odom_inited_ = true;
+            *prev_cloud_ = *curr_cloud_;
+            // Pose6DOF transform;
+
+
+            icp_latest_transform_ = Pose6DOF(T,stamp);
+            Pose6DOF prev_pose = getLatestPose();
+            pose = prev_pose + icp_latest_transform_;
+
+            // bool success = updateICPOdometry(latest_stamp, T);
+            // if (success) {
+            //     odom_inited_ = true;
+            //     *prev_cloud_ = *curr_cloud_;
+            // }
 
 
             transformCloudToPoseFrame(prev_cloud_, T, aligned_cloud);
 
-            // if (map_cloud_pub.getNumSubscribers() != 0){
-            //     publishPointCloud(map_cloud_, "base_link", stamp, &map_cloud_pub);
+            // if (prev_cloud_pub_.getNumSubscribers() != 0){
+            //     publishPointCloud(prev_cloud_, "base_link", stamp, &map_cloud_pub);
             // }
 
             if (aligned_cloud_pub_.getNumSubscribers() != 0){
-                publishPointCloud(aligned_cloud, "odom", stamp, &aligned_cloud_pub_);
+                publishPointCloud(aligned_cloud, "base_link", stamp, &aligned_cloud_pub_);
             }
 
             if (curr_cloud_pub_.getNumSubscribers() != 0){
@@ -380,7 +432,7 @@ public:
        
     }
 
-    void publishGlobalMap(ros::Time& stamp)
+    void publishGlobalMap() // const ros::Time& stamp
     {
 
         if (cloudKeyPoses3D->points.empty() == true)
@@ -422,71 +474,10 @@ public:
         downSizeFilterGlobalMapKeyFrames.setInputCloud(globalMapKeyFrames);
         downSizeFilterGlobalMapKeyFrames.filter(*globalMapKeyFramesDS);
 
-        // mtx.lock();
-        // *map_cloud_ = *globalMapKeyFramesDS;
-        // mtx.unlock();
-
-        // transform.inverse();
-        // Eigen::Matrix4 odom_to_base_link;
-        // odom_to_base_link = transform.toEigenMatrix();
-
-        // pcl::transformPointCloud(*globalMapKeyFramesDS, *map_cloud_, odom_to_base_link);
-
-        publishCloud(&map_cloud_pub_, globalMapKeyFramesDS, latest_stamp, odometryFrame);
+        publishCloud(&map_cloud_pub_, globalMapKeyFramesDS, latest_stamp, "odom");
     }
 
-    // void cloudforICP()
-    // {
-    //     std::cout << "cloud for icp" << std::endl;
-    //     // map_cloud_->clear();
-    //     if (cloudKeyPoses3D->points.empty() == true)
-    //         return;
-
-    //     pcl::KdTreeFLANN<PointType>::Ptr kdtreeGlobalMap(new pcl::KdTreeFLANN<PointType>());;
-    //     pcl::PointCloud<PointType>::Ptr globalMapKeyPoses(new pcl::PointCloud<PointType>());
-    //     pcl::PointCloud<PointType>::Ptr globalMapKeyPosesDS(new pcl::PointCloud<PointType>());
-    //     pcl::PointCloud<PointType>::Ptr globalMapKeyFrames(new pcl::PointCloud<PointType>());
-    //     pcl::PointCloud<PointType>::Ptr globalMapKeyFramesDS(new pcl::PointCloud<PointType>());
-
-    //     // kd-tree to find near key frames to visualize
-    //     std::vector<int> pointSearchIndGlobalMap;
-    //     std::vector<float> pointSearchSqDisGlobalMap;
-    //     // search near key frames to visualize
-    //     mtx.lock();
-    //     kdtreeGlobalMap->setInputCloud(cloudKeyPoses3D);
-    //     kdtreeGlobalMap->radiusSearch(cloudKeyPoses3D->back(), 1, pointSearchIndGlobalMap, pointSearchSqDisGlobalMap, 0);
-    //     mtx.unlock();
-
-    //     for (int i = 0; i < (int)pointSearchIndGlobalMap.size(); ++i)
-    //         globalMapKeyPoses->push_back(cloudKeyPoses3D->points[pointSearchIndGlobalMap[i]]);
-    //     // downsample near selected key frames
-    //     pcl::VoxelGrid<PointType> downSizeFilterGlobalMapKeyPoses; // for global map visualization
-    //     downSizeFilterGlobalMapKeyPoses.setLeafSize(globalMapVisualizationPoseDensity, globalMapVisualizationPoseDensity, globalMapVisualizationPoseDensity); // for global map visualization
-    //     downSizeFilterGlobalMapKeyPoses.setInputCloud(globalMapKeyPoses);
-    //     downSizeFilterGlobalMapKeyPoses.filter(*globalMapKeyPosesDS);
-
-    //     // extract visualized and downsampled key frames
-    //     for (int i = 0; i < (int)globalMapKeyPosesDS->size(); ++i){
-    //         if (pointDistance(globalMapKeyPosesDS->points[i], cloudKeyPoses3D->back()) > 1)
-    //             continue;
-    //         int thisKeyInd = (int)globalMapKeyPosesDS->points[i].intensity;
-    //         *globalMapKeyFrames += *CloudKeyFrames[thisKeyInd];
-    //         // *globalMapKeyFrames += *transformPointCloud(CloudKeyFrames[thisKeyInd],  &cloudKeyPoses6D->points[thisKeyInd]);
-    //     }
-    //     // downsample visualized points
-    //     pcl::VoxelGrid<PointType> downSizeFilterGlobalMapKeyFrames; // for global map visualization
-    //     downSizeFilterGlobalMapKeyFrames.setLeafSize(globalMapVisualizationLeafSize, globalMapVisualizationLeafSize, globalMapVisualizationLeafSize); // for global map visualization
-    //     downSizeFilterGlobalMapKeyFrames.setInputCloud(globalMapKeyFrames);
-    //     downSizeFilterGlobalMapKeyFrames.filter(*map_cloud_);
-
-        
-    //     // if (map_cloud_pub.getNumSubscribers() != 0){
-    //     //     publishPointCloud(map_cloud_, "base_link", latest_stamp, &map_cloud_pub);
-    //     // }
-    // }
-
-    void transformCloudToPoseFrame(
-    const pcl::PointCloud<PointType>::Ptr& in_cloud, const Pose6DOF& pose, pcl::PointCloud<PointType>::Ptr& out_cloud) {
+    void transformCloudToPoseFrame(const pcl::PointCloud<PointType>::Ptr& in_cloud, const Pose6DOF& pose, pcl::PointCloud<PointType>::Ptr& out_cloud) {
         tf::Transform tf_cloud_in_pose = pose.toTFTransform();
         try {
             pcl_ros::transformPointCloud(*in_cloud, *out_cloud, tf_cloud_in_pose);
@@ -522,9 +513,9 @@ public:
 
         std::lock_guard<std::mutex> lock(mtx);
         pcl::GeneralizedIterativeClosestPoint<PointType, PointType> icp;
-        icp.setMaximumIterations(70);
+        icp.setMaximumIterations(30);
         icp.setTransformationEpsilon(ICP_EPSILON);
-        icp.setMaxCorrespondenceDistance(200);
+        icp.setMaxCorrespondenceDistance(150);
         icp.setRANSACIterations(0);
         icp.setInputSource(cloud_in_map);
         icp.setInputTarget(map_cloud);
@@ -536,27 +527,38 @@ public:
 
         std::cout << "MAP ICP FITNESS SCORE : " << icp.getFitnessScore() << std::endl;
 
-        if (icp.hasConverged() && icp.getFitnessScore() < 0.2) {
+        if (icp.hasConverged() && icp.getFitnessScore() < 0.1) {
             ROS_INFO("ICP converged");
-            // bool success = updateICPOdometry(latest_stamp, T);
-            // if(success){
-            //     odom_inited_ = true;
-            // }
+        
+            bool success = updateICPOdometry(latest_stamp, T);
+            if (success) {
+                odom_inited_ = true;
+                *prev_cloud_ = *curr_cloud_;
+            }
             transform = Pose6DOF(T, latest_stamp);
 
+            if (registered_cloud_pub_.getNumSubscribers() > 0) {
+                publishPointCloud(cloud_in_map, "odom", latest_stamp, &registered_cloud_pub_);
+            }
+
+            if (map_cloud_pub.getNumSubscribers() != 0){
+                publishPointCloud(map_cloud_, "odom", latest_stamp, &map_cloud_pub);
+            }
             return true;
+
+            if (prev_cloud_pub_.getNumSubscribers() != 0){
+                publishPointCloud(prev_cloud_, "base_link", latest_stamp, &map_cloud_pub);
+            }
         }
 
         return false;
     }
 
-    bool updateICPOdometry(const ros::Time& stamp, const Eigen::Matrix4d& T) {
+    bool updateICPOdometry(const ros::Time& stamp, const Eigen::Matrix4d& T) {  // const Eigen::Matrix4d& T  Pose6DOF& transform
         ROS_INFO("ICP odometry update!");
         Pose6DOF transform(T, stamp);
         Pose6DOF prev_pose = getLatestPose();
         Pose6DOF new_pose = prev_pose + transform;
-
-        // std::cout << "Z COORDINATE: " << new_pose.pos(2) << std::endl;
         icp_latest_transform_ += transform;
 
 
@@ -614,80 +616,95 @@ public:
 
         latest_stamp = cloud_msg->header.stamp;
         // mtx.lock();
-        // performICP(latest_stamp);
-        Pose6DOF transform_refined, pose;
+       
+        // Pose6DOF pose;
 
+        // pose = getLatestPose();
+        Pose6DOF icp_odom_pose, transform, pose, pose_ICP;
         pose = getLatestPose();
-        
-        if (prev_cloud_->points.size() == 0) {
-            // *map_cloud_ = *curr_cloud_;
+
+        std::cout << "ITERAÇÃO: " << iter << std::endl;
+        if(iter == 0){
             *prev_cloud_ = *curr_cloud_;
+
+            pcl::PointCloud<PointType>::Ptr cloud_in_map(new pcl::PointCloud<PointType>());
+            transformCloudToPoseFrame(curr_cloud_, pose, cloud_in_map);
+            addPointsToMap(cloud_in_map);
+            iter++;
             return;
         }
-
-        performICP(latest_stamp);
-        bool registration_success = refineTransformAndGrowMap(latest_stamp, prev_cloud_, prev_icp_odom, transform_refined);
-
-        if (registration_success){
-            std::cout << "SUCESSO NA REFINE" << std::endl;
-            icp_latest_transform_ = transform_refined;
+        if(iter >= 1){
             
+            performICP(latest_stamp, pose);
+
+            bool registration_success = refineTransformAndGrowMap(latest_stamp, curr_cloud_, prev_icp_odom, transform);
+
+            if(registration_success){
+                std::cout << "SUCESSO NA REFINE" << std::endl;
+                icp_latest_transform_ = transform;
+            }
+
+            else{
+                pcl::PointCloud<PointType>::Ptr cloud_in_map(new pcl::PointCloud<PointType>());
+                transformCloudToPoseFrame(curr_cloud_, pose, cloud_in_map);    
+                addPointsToMap(cloud_in_map);
+            }
+
+            // icp_latest_transform_ = transform;
+            pose = prev_icp_odom + icp_latest_transform_;
+
+            // pose = prev_icp_odom + icp_latest_transform_;
+            saveKeyFrames(latest_stamp, pose);
+            publishFrames(latest_stamp, pose);
+
+
+            prev_icp_odom = pose;
+            iter++;
         }
 
-        pose = prev_icp_odom + icp_latest_transform_;
-        saveKeyFrames(latest_stamp, pose);
-        publishFrames(latest_stamp, pose);
+        // if (map_cloud_->points.size() == 0) {
+        //     *prev_cloud_ = *curr_cloud_;
 
+        //     pcl::PointCloud<PointType>::Ptr cloud_in_map(new pcl::PointCloud<PointType>());
+        //     transformCloudToPoseFrame(prev_cloud_, pose, cloud_in_map);
+        //     addPointsToMap(cloud_in_map);
+        //     iter++;
+        //     return;
+        // }
 
         
+
+        // performMapICP(latest_stamp, prev_cloud_, prev_icp_odom, transform);
+
+        // refineTransformAndGrowMap(latest_stamp, prev_cloud_, prev_icp_odom, refined_transform);
+
+       
         
-        prev_icp_odom = pose;
-
-        // mtx.unlock();
-
     }
 
-    bool refineTransformAndGrowMap(const ros::Time& stamp, const pcl::PointCloud<PointType>::Ptr& cloud, const Pose6DOF& raw_pose, Pose6DOF& transform) {
+    bool refineTransformAndGrowMap(const ros::Time& stamp, const pcl::PointCloud<PointType>::Ptr& cloud, const Pose6DOF& prev_pose, Pose6DOF& transform) {
         
         pcl::PointCloud<PointType>::Ptr cloud_in_map(new pcl::PointCloud<PointType>());
-        // pcl::PointCloud<PointType>::Ptr map_robotFrame(new pcl::PointCloud<PointType>());
         
-        // *cloud_in_map = *transformPointCloud(cloud, raw_pose);
-        transformCloudToPoseFrame(cloud, raw_pose, cloud_in_map);
+        transformCloudToPoseFrame(cloud, prev_pose, cloud_in_map);
         
-        if (map_cloud_->points.size() == 0) {
-            ROS_INFO("CHEGUEI AQUI");
-            addPointsToMap(cloud_in_map);
-            return false;
-        }
-
-        // pcl::PointCloud<PointType>::Ptr nn_cloud_in_map(new pcl::PointCloud<PointType>());
-        // pcl::PointCloud<PointType>::Ptr nn_cloud(new pcl::PointCloud<PointType>());
-
-        // // Get closest points in map to current cloud via nearest-neighbors search
-        // mtx.lock();
-        // approxNearestNeighbors(cloud_in_map, nn_cloud_in_map);
-        // mtx.unlock();
-
-        // *nn_cloud = *transformPointCloud(nn_cloud_in_map, transform.inverse());
-        
-        // publishPointCloud(nn_cloud, "base_link", stamp, &nn_cloud_pub_);
-        
-        // ROS_INFO("CHEGUEI AQUI");
-
-
-        // transformCloudToPoseFrame(map_cloud_, raw_pose.inverse(), map_robotFrame);
+        // if (map_cloud_->points.size() == 0) {
+        //     // ROS_INFO("CHEGUEI AQUI");
+        //     addPointsToMap(cloud_in_map);
+        //     return false;
+        // }
 
         if (estimateTransformICP(cloud_in_map, map_cloud_, transform)) {
-            Pose6DOF pose = raw_pose + transform;
+            Pose6DOF new_pose = prev_pose + transform;
 
+            std::cout << "STAMP FOR FINE ICP: " << latest_stamp << std::endl;
             // std::cout << "REFINED POSE" << std::endl;
-            std::cout << "ICP odometry refined pose = " << pose.toStringQuat("   ");
+            std::cout << "ICP odometry refined pose = " << new_pose.toStringQuat("   ");
             std::cout << "Cloud transform = " << transform.toStringQuat("   ");
 
             // pcl::PointCloud<PointType>::Ptr aligned_cloud_in_map(new pcl::PointCloud<PointType>());
 
-            transformCloudToPoseFrame(cloud, pose, cloud_in_map);
+            transformCloudToPoseFrame(cloud, new_pose, cloud_in_map);
             addPointsToMap(cloud_in_map);
             
             if (registered_cloud_pub_.getNumSubscribers() > 0) {
@@ -697,40 +714,12 @@ public:
             if (map_cloud_pub.getNumSubscribers() != 0){
                 publishPointCloud(map_cloud_, "odom", stamp, &map_cloud_pub);
             }
-
-
-            // publishPointCloud(map_cloud_, "odom", stamp, &map_cloud_pub_);
-            // publishPointCloud(cloud_in_map, "odom", stamp, &registered_cloud_pub_);
-            // publishPath(refined_pose);
-
-            // refined_poses.push_back(refined_pose);
-
             return true;
         }
         return false;
     }
-    // bool saveFrame()
-    // {
-    //     if (cloudKeyPoses3D->points.empty())
-    //         return true;
-
-    //     Eigen::Affine3f transStart = pclPointToAffine3f(cloudKeyPoses6D->back());
-    //     Eigen::Affine3f transFinal = pcl::getTransformation(transformTobeMapped[3], transformTobeMapped[4], transformTobeMapped[5], 
-    //                                                         transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]);
-    //     Eigen::Affine3f transBetween = transStart.inverse() * transFinal;
-    //     float x, y, z, roll, pitch, yaw;
-    //     pcl::getTranslationAndEulerAngles(transBetween, x, y, z, roll, pitch, yaw);
-
-    //     if (abs(roll)  < surroundingkeyframeAddingAngleThreshold &&
-    //         abs(pitch) < surroundingkeyframeAddingAngleThreshold && 
-    //         abs(yaw)   < surroundingkeyframeAddingAngleThreshold &&
-    //         sqrt(x*x + y*y + z*z) < surroundingkeyframeAddingDistThreshold)
-    //         return false;
-
-    //     return true;
-    // }
     
-    void saveKeyFrames(ros::Time& stamp, const Pose6DOF& pose)
+    void saveKeyFrames(const ros::Time& stamp, const Pose6DOF& pose) // const ros::Time& stamp, const Pose6DOF& pose
     {
         // if (saveFrame() == false)
         //     return;
@@ -761,7 +750,7 @@ public:
 
         // std::cout << "POINTCLOUD PITCH: " << thisPose6D.pitch*180/M_PI << std::endl; 
         
-        double h_time = latest_stamp.toSec();
+        double h_time = stamp.toSec();
         thisPose6D.time = h_time;
         cloudKeyPoses6D->push_back(thisPose6D);
 
@@ -789,7 +778,7 @@ public:
     //     tf_broadcaster.sendTransform(map_to_odom_tf);
     // }
 
-    void publishFrames(ros::Time& stamp, const Pose6DOF& pose)
+    void publishFrames(const ros::Time& stamp, const Pose6DOF& pose) // const ros::Time& stamp, const Pose6DOF& pose
     {
         if (cloudKeyPoses3D->points.empty())
             return;
@@ -804,18 +793,56 @@ public:
             pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
             PointTypePose thisPose6D = PosetoPointTypePose(pose);
             *cloudOut += *transformPointCloud(curr_cloud_,  &thisPose6D);
-            publishCloud(&pubCloudRegisteredDS, cloudOut, latest_stamp, odometryFrame);
+            publishCloud(&pubCloudRegisteredDS, cloudOut, stamp, "odom");
         }
+        
         // publish registered high-res raw cloud
 
-        
         if (pubCloudRegisteredRaw.getNumSubscribers() != 0){
             pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
             PointTypePose thisPose6D = PosetoPointTypePose(pose);
             *cloudOut = *transformPointCloud(raw_cloud,  &thisPose6D);
-            publishCloud(&pubCloudRegisteredRaw, cloudOut, latest_stamp, odometryFrame);
+            publishCloud(&pubCloudRegisteredRaw, cloudOut, stamp, "odom");
         }
     }
+
+    void savePointCloud()
+    {
+        // save final point cloud and trajectory
+
+        std::cout << "SAVING PCDS" << endl;
+        string mapString = "/home/joaojorge/Documents/map.pcd";
+        string trajectoryString = "/home/joaojorge/Documents/trajectory.pcd";
+
+        pcl::PointCloud<PointType>::Ptr mapCloud(new pcl::PointCloud<PointType>());
+        pcl::PointCloud<PointType>::Ptr mapCloudDS(new pcl::PointCloud<PointType>());
+        
+        for (int i = 0; i < (int)cloudKeyPoses3D->size(); i++) {
+            *mapCloud  += *transformPointCloud(CloudKeyFrames[i],   &cloudKeyPoses6D->points[i]);
+            std::cout << "\r" << std::flush << "Processing feature cloud " << i << " of " << cloudKeyPoses6D->size() << " ...";
+        }
+
+        downSizeFilterMap.setInputCloud(mapCloud);
+        downSizeFilterMap.setLeafSize(0.2, 0.2, 0.2);
+        downSizeFilterMap.filter(*mapCloudDS);
+
+
+        pcl::io::savePCDFileASCII(mapString, *mapCloud);
+        pcl::io::savePCDFileASCII(trajectoryString, *cloudKeyPoses3D);
+
+        std::cout << "****************************************************" << std::endl;
+        std::cout << "Saving map to pcd files completed" << std::endl;
+    }
+
+    //   void visualizeGlobalMapThread()
+    // {
+    //     //
+    //     ros::Rate rate(0.2);
+    //     while (ros::ok()){
+    //         rate.sleep();
+    //         publishGlobalMap(latest_stamp);
+    //     }
+    // }
 
     void main_loop(){
         ROS_INFO("Main loop started");
@@ -827,7 +854,7 @@ public:
 
         // We start at the origin
         
-        // prev_icp_odom_pose = Pose6DOF::getIdentity();
+        prev_icp_odom_pose = Pose6DOF::getIdentity();
         // prev_icp_pose = prev_icp_odom_pose;
 
         // ros::Time latest_stamp = ros::Time::now();
@@ -839,37 +866,50 @@ public:
         while (ros::ok()) {
             // publishMapToOdomTf(latest_stamp);
             if (isOdomReady()) {
+               
                 pcl::PointCloud<PointType>::Ptr cloud(new pcl::PointCloud<PointType>());
                 getEstimates(latest_stamp, cloud, icp_transform, icp_odom_pose, new_transform_icp);
 
-            //     std::cout << "ICP Tranform: " << icp_transform << std::endl;
+                //     std::cout << "ICP Tranform: " << icp_transform << std::endl;
                 
                 if (new_transform_icp) {
 
-
-
-                    // Pose6DOF refined_transform;
+               
                     // std::cout << "STAMP FOR FINE ICP: " << latest_stamp << std::endl;
-                    // bool registration_success = refineTransformAndGrowMap(latest_stamp, cloud, prev_icp_odom_pose, refined_transform);
-                    // if (registration_success) {
-                    //     ROS_INFO("Refinement successful");
-                    //     icp_transform = refined_transform;
-                    // }
+
+                
+
+                    // icp_transform = refined_transform;
                     // icp_odom_pose = prev_icp_odom_pose + icp_transform;
 
+                    // saveKeyFrames(latest_stamp,icp_odom_pose);
+                    // publishFrames(latest_stamp,icp_odom_pose);
+
+                    // Pose6DOF refined_transform;
+                    // bool registration_sucess = refineTransformAndGrowMap(latest_stamp, cloud, prev_icp_odom_pose, refined_transform);
+                    // if (registration_sucess) {
+                    //     ROS_INFO("Refinement successful");
+                    //     icp_transform = refined_transform; 
+                    // }
+                    // // 
+                    // icp_odom_pose = prev_icp_odom_pose + icp_transform;
+                    // bool success = updateICPOdometry(latest_stamp, icp_transform);
+                    // if (success){
+                        
+                    // }
                     
-                    publishGlobalMap(latest_stamp);
-                    
+
+                    publishGlobalMap();
 
                     new_transform_icp = false;
                 }
-
-                prev_icp_odom_pose = icp_odom_pose;
+                // prev_icp_odom_pose = icp_odom_pose;
             }
 
             // iter++;
             ros::spinOnce();
         }
+        // savePointCloud();
     }
     // ONLY USE THIS IF THERE IS a GLOBAL MAP OPTIMIZER LIKE POSE GRAPH 
     // void computeMapToOdomTransform() { 

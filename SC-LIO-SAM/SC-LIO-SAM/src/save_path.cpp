@@ -43,20 +43,27 @@ void callhandler(const nav_msgs::Odometry::ConstPtr& msg)
         // Save the transformation matrix to the file
         // ofs << msg->header.stamp << " ";
         // ofs << transformation_matrix << "\n";
+        for (int i = 0; i < transformation_matrix.rows(); ++i) {
+            for (int j = 0; j < transformation_matrix.cols(); ++j) {
+                ofs << transformation_matrix(i, j) << " ";
+            }
+        }
 
-        ofs << rotation_matrix[0][0] << " ";
-        ofs << rotation_matrix[0][1] << " ";
-        ofs << rotation_matrix[0][2] << " ";
-        ofs << rotation_matrix[1][0] << " ";
-        ofs << rotation_matrix[1][1] << " ";
-        ofs << rotation_matrix[1][2] << " ";
-        ofs << rotation_matrix[2][0] << " ";
-        ofs << rotation_matrix[2][1] << " ";
-        ofs << rotation_matrix[2][2] << " ";
-        ofs << 0 << " ";
-        ofs << 0 << " ";
-        ofs << 0 << " ";
-        ofs << 1 << " ";
+        ofs << std::endl;
+        
+        // ofs << rotation_matrix[0][0] << " ";
+        // ofs << rotation_matrix[0][1] << " ";
+        // ofs << rotation_matrix[0][2] << " ";
+        // ofs << rotation_matrix[1][0] << " ";
+        // ofs << rotation_matrix[1][1] << " ";
+        // ofs << rotation_matrix[1][2] << " ";
+        // ofs << rotation_matrix[2][0] << " ";
+        // ofs << rotation_matrix[2][1] << " ";
+        // ofs << rotation_matrix[2][2] << " ";
+        // ofs << msg->pose.pose.position.x << " ";
+        // ofs << msg->pose.pose.position.y << " ";
+        // ofs << msg->pose.pose.position.z << " ";
+        // ofs << 1 << "\n";
 
 
         // ofs << msg->header.stamp << " ";
@@ -74,15 +81,16 @@ void callhandler(const nav_msgs::Odometry::ConstPtr& msg)
 
 int main(int argc, char **argv)
 {   
-    ros::init(argc, argv, "save_path");
-    ros::NodeHandle nh;
-    ros::Subscriber Listener = nh.subscribe<nav_msgs::Odometry>("lio_sam/mapping/odometry", 100, callhandler); // //integrated_to_init
+    // ros::init(argc, argv, "save_path");
+    // ros::NodeHandle nh;
+    // ros::Subscriber Listener = nh.subscribe<nav_msgs::Odometry>("lio_sam/mapping/odometry", 200, callhandler); // //integrated_to_init
+    // // ros::Subscriber Listener = nh.subscribe<nav_msgs::Odometry>("icp_odometry/odom", 100, callhandler); 
     
-    if(ofs.good()){
-        remove("/home/joaojorge/GEORGIA_TECH_LIO_SLAM_SEQ00.txt");
-        ofs.open("/home/joaojorge/GEORGIA_TECH_LIO_SLAM_SEQ00.txt", std::ofstream::app);
-    }
-    ros::spin();
+    // if(ofs.good()){
+    //     remove("/home/joaojorge/Documents/LIO_SAM_E4.txt");
+    //     ofs.open("/home/joaojorge/Documents/LIO_SAM_E4.txt", std::ofstream::app);
+    // }
+    // ros::spin();
 
     return 0;
 }

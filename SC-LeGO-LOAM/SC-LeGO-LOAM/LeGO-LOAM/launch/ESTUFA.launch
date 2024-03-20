@@ -1,7 +1,7 @@
 <launch>
 
-    <arg name='bag' value="/home/joaojorge/e3/e3_new.bag"/>
-    <!-- <arg name='bag' value="/home/joaojorge/e3/e3_fixed.bag"/> -->
+    <!-- <arg name='bag' value="/home/joaojorge/e4_new.bag"/> -->
+    <arg name='bag' value="/home/joaojorge/e4.bag"/>
     <!--- Sim Time -->
     <param name="/use_sim_time" value="true" />
 
